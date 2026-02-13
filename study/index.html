@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title data-i18n="title">勉強時間管理</title>
+    <title data-i18n="title">ツミキ | 勉強時間管理ツール - 自分好みにカスタマイズできる勉強時間管理ツール</title>
     <link rel="shortcut icon" href="favicon.ico">
     <link rel="shortcut icon" type="image/webp" href="favicon.webp">
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
@@ -3086,11 +3086,20 @@
         try {
             var _m = localStorage.getItem('mode');
             var _t = localStorage.getItem('theme');
+            var _normalizedTheme = (_t || '').trim().toLowerCase();
+            var _validThemes = ['blue', 'green', 'purple', 'orange', 'pink', 'teal', 'white'];
             if (_m === 'dark') { document.body.className = 'dark'; }
-            if (_t) { document.body.setAttribute('data-theme', _t.trim()); }
+            if (_normalizedTheme === 'light' || _normalizedTheme === 'dark') {
+                localStorage.setItem('mode', _normalizedTheme);
+            } else if (_validThemes.includes(_normalizedTheme)) {
+                document.body.setAttribute('data-theme', _normalizedTheme);
+                localStorage.setItem('last_valid_theme', _normalizedTheme);
+            }
         } catch(e) {}
     </script>
     <div id="loadingOverlay"></div>
+    <canvas id="pipCanvas" width="960" height="540" style="display:none;"></canvas>
+    <video id="pipVideo" style="display:none;" muted playsinline></video>
 
     <div class="custom-confirm-overlay" id="customConfirmOverlay">
         <div class="custom-confirm-dialog">
@@ -3202,7 +3211,7 @@
     </div>
 
     <div class="container">
-        <h1 data-i18n="studyTimeManagement">勉強時間管理</h1>
+        <h1 data-i18n="studyTimeManagement">ツミキ | 勉強時間管理</h1>
 
         <div class="menu" id="mainMenu">
             <button class="active" onclick="showPage('timer')" data-page="timer" data-i18n="menuTimer">タイマー</button>
@@ -3499,6 +3508,12 @@
                 <div class="toggle-item">
                     <span data-i18n="loadingAnimSetting">ローディングアニメーション表示</span>
                     <div class="toggle-switch" id="toggleLoadingAnim" onclick="toggleLoadingAnim()">
+                        <div class="toggle-slider"></div>
+                    </div>
+                </div>
+                <div class="toggle-item">
+                    <span data-i18n="autoPiP">自動ミニモード (PiP)</span>
+                    <div class="toggle-switch" id="toggleAutoPiP" onclick="toggleAutoPiP()">
                         <div class="toggle-slider"></div>
                     </div>
                 </div>
@@ -3826,60 +3841,64 @@
             <div class="about-overlay" id="licenseOverlay" aria-hidden="true">
                 <div class="about-dialog" role="dialog" aria-modal="true" aria-labelledby="licenseTitle">
                     <h2 id="licenseTitle" data-i18n="licenseTitle">フォントライセンス</h2>
-                    <div id="licenseContent" class="about-content"
-                        style="font-size: 0.85rem; max-height: 60vh; overflow-y: auto; text-align: left;">
-                        <b>[Google Fonts]</b><br>
-                        <b>Jost</b><br>
-                        by Indestructible Type (SIL OFL 1.1)<br>
-                        <br>
-                        <b>Zen Kaku Gothic Antique</b><br>
-                        by Astrolab Inc. (SIL OFL 1.1)<br>
-                        <br>
-                        <b>JetBrains Mono</b><br>
-                        by JetBrains s.r.o. (SIL OFL 1.1)<br>
-                        <br>
-                        <b>Montserrat</b><br>
-                        by Julieta Ulanovsky (SIL OFL 1.1)<br>
-                        <br>
-                        <b>Lora</b><br>
-                        by Cyreal (SIL OFL 1.1)<br>
-                        <br>
-                        <b>Quicksand</b><br>
-                        by Andrew Paglinawan (SIL OFL 1.1)<br>
-                        <br>
-                        <b>Klee One</b><br>
-                        by Fontworks Inc. (SIL OFL 1.1)<br>
-                        <br>
-                        <b>BIZ UDPGothic</b><br>
-                        by Morisawa Inc. (SIL OFL 1.1)<br>
-                        <br>
-                        <b>Zen Maru Gothic</b><br>
-                        by Yoshimichi Ohira (SIL OFL 1.1)<br>
-                        <br>
-                        <b>Noto Sans JP</b><br>
-                        by Google (SIL OFL 1.1)<br>
-                        <br>
-                        <b>Sawarabi Gothic</b><br>
-                        by mplus-fonts-dev (SIL OFL 1.1 / CC BY 4.0)<br>
-                        <br>
-                        <b>Hina Mincho</b><br>
-                        by Shujiro Sano (SIL OFL 1.1)<br>
-                        <br>
-                        <hr style="opacity: 0.2; margin: 15px 0;">
-                        <br>
-                        <b>[Local Fonts]</b><br>
-                        <b>うつくし明朝体 (Utsukushi Font)</b><br>
-                        by FLOP DESIGN (IPA Font License v1.0)<br>
-                        <br>
-                        <b>美咲ゴシック (Misaki Gothic)</b><br>
-                        by 門真 なむ / Little Limit (Free License)<br>
-                        <br>
-                        <b>小伝馬町 (Kodenmachou)</b><br>
-                        by 自家製フォント工房 (SIL OFL 1.1)<br>
-                        <br>
-                        <b>無心 (Mushin)</b><br>
-                        by Maniackers Design (SIL OFL 1.1)
-                    </div>
+<div id="licenseContent" class="about-content"
+    style="font-size: 0.85rem; max-height: 60vh; overflow-y: auto; text-align: left;">
+    <b>[Google Fonts]</b><br>
+    
+    <a href="https://fonts.google.com/specimen/Jost" target="_blank" style="color: inherit; text-decoration: underline;"><b>Jost</b></a><br>
+    by Indestructible Type (SIL OFL 1.1)<br>
+    <br>
+    <a href="https://fonts.google.com/specimen/Zen+Kaku+Gothic+Antique" target="_blank" style="color: inherit; text-decoration: underline;"><b>Zen Kaku Gothic Antique</b></a><br>
+    by Astrolab Inc. (SIL OFL 1.1)<br>
+    <br>
+    <a href="https://fonts.google.com/specimen/JetBrains+Mono" target="_blank" style="color: inherit; text-decoration: underline;"><b>JetBrains Mono</b></a><br>
+    by JetBrains s.r.o. (SIL OFL 1.1)<br>
+    <br>
+    <a href="https://fonts.google.com/specimen/Montserrat" target="_blank" style="color: inherit; text-decoration: underline;"><b>Montserrat</b></a><br>
+    by Julieta Ulanovsky (SIL OFL 1.1)<br>
+    <br>
+    <a href="https://fonts.google.com/specimen/Lora" target="_blank" style="color: inherit; text-decoration: underline;"><b>Lora</b></a><br>
+    by Cyreal (SIL OFL 1.1)<br>
+    <br>
+    <a href="https://fonts.google.com/specimen/Quicksand" target="_blank" style="color: inherit; text-decoration: underline;"><b>Quicksand</b></a><br>
+    by Andrew Paglinawan (SIL OFL 1.1)<br>
+    <br>
+    <a href="https://fonts.google.com/specimen/Klee+One" target="_blank" style="color: inherit; text-decoration: underline;"><b>Klee One</b></a><br>
+    by Fontworks Inc. (SIL OFL 1.1)<br>
+    <br>
+    <a href="https://fonts.google.com/specimen/BIZ+UDPGothic" target="_blank" style="color: inherit; text-decoration: underline;"><b>BIZ UDPGothic</b></a><br>
+    by Morisawa Inc. (SIL OFL 1.1)<br>
+    <br>
+    <a href="https://fonts.google.com/specimen/Zen+Maru+Gothic" target="_blank" style="color: inherit; text-decoration: underline;"><b>Zen Maru Gothic</b></a><br>
+    by Yoshimichi Ohira (SIL OFL 1.1)<br>
+    <br>
+    <a href="https://fonts.google.com/specimen/Noto+Sans+JP" target="_blank" style="color: inherit; text-decoration: underline;"><b>Noto Sans JP</b></a><br>
+    by Google (SIL OFL 1.1)<br>
+    <br>
+    <a href="https://fonts.google.com/specimen/Sawarabi+Gothic" target="_blank" style="color: inherit; text-decoration: underline;"><b>Sawarabi Gothic</b></a><br>
+    by mplus-fonts-dev (SIL OFL 1.1 / CC BY 4.0)<br>
+    <br>
+    <a href="https://fonts.google.com/specimen/Hina+Mincho" target="_blank" style="color: inherit; text-decoration: underline;"><b>Hina Mincho</b></a><br>
+    by Shujiro Sano (SIL OFL 1.1)<br>
+    <br>
+    
+    <hr style="opacity: 0.2; margin: 15px 0;">
+    <br>
+    
+    <b>[Local Fonts]</b><br>
+    
+    <a href="https://flopdesign.com/blog/font/58/" target="_blank" style="color: inherit; text-decoration: underline;"><b>うつくし明朝体 (Utsukushi Font)</b></a><br>
+    by FLOP DESIGN (IPA Font License v1.0)<br>
+    <br>
+    <a href="https://littlelimit.net/misaki.htm" target="_blank" style="color: inherit; text-decoration: underline;"><b>美咲ゴシック (Misaki Gothic)</b></a><br>
+    by 門真 なむ / Little Limit (MIT License)<br>
+    <br>
+    <a href="http://jikasei.me/font/kh-dotfont/" target="_blank" style="color: inherit; text-decoration: underline;"><b>小伝馬町 (Kodenmachou)</b></a><br>
+    by 自家製フォント工房 (SIL OFL 1.1)<br>
+    <br>
+    <a href="https://modi.jpn.org/font_mushin.php" target="_blank" style="color: inherit; text-decoration: underline;"><b>無心 (Mushin)</b></a><br>
+    by Maniackers Design (IPA Font License v1.0)
+</div>
                     <div class="about-actions">
                         <button class="primary" id="licenseOkBtn" data-i18n="closeButton">閉じる</button>
                     </div>
@@ -3898,6 +3917,11 @@
                 let isLoop = false;
                 let isShuffle = false;
                 let _musicDB = null;
+                let pipCanvas = null;
+                let pipCtx = null;
+                let pipVideo = null;
+                let pipStream = null;
+                let pipDrawInterval = null;
 
                 // 多言語対応システム
                 let currentLanguage = 'ja'; // デフォルトは日本語
@@ -3905,7 +3929,7 @@
                 const translations = {
                     ja: {
                         // メタ
-                        title: '勉強時間管理',
+                        title: 'ツミキ | 勉強時間管理',
                         description: '勉強とともにタイマーをスタートし、作業時間を記録しましょう。',
 
 
@@ -4060,6 +4084,7 @@
                         themeWhite: 'ホワイト/ブラック',
                         lockSettingsDuringTimer: 'タイマー作動中は設定を無効化',
                         loadingAnimSetting: 'ローディングアニメーション表示',
+                        autoPiP: '自動ミニモード (PiP)',
                         graphDisplay: 'グラフ表示',
                         studyGraph: '勉強時間のグラフ表示',
                         graphType: 'グラフの種類',
@@ -4151,13 +4176,13 @@
 
                         // 汎用
                         confirmDefaultTitle: '確認',
-                        studyTimeManagement: '勉強時間管理',
+                        studyTimeManagement: 'ツミキ | 勉強時間管理',
                         cancelButton: 'キャンセル',
 
                         // About & QA
                         aboutContent: `<div style="text-align: center; margin-bottom: 20px;">
                         <div><img src="guide.webp" style="width: 3rem; height: 3rem;"></div>
-                        <h3 style="margin-top: 0;">Study Time Manager</h3>
+                        <h3 style="margin-top: 0;">Tsumiki | Study Time Manager</h3>
                         <p>シンプルで使いやすい勉強時間管理ツール。</p>
                         このサイトは<a href="https://kokyujene.super-hiko14.com/members/super-hiko14/">Super Hiko14</a>が開発しました。<div class="tyuui-mini-text">※ 一部AIが使用されています。</div>
                         </div>`,
@@ -4267,7 +4292,7 @@
                         licenseTitle: 'Font Licenses',
 
                         // Meta
-                        title: 'Study Time Manager',
+                        title: 'Tsumiki | Study Time Manager',
                         description: 'Start the timer with your study session and track your work time.',
 
                         // Main Menu
@@ -4373,6 +4398,7 @@
                         themeWhite: 'White/Black',
                         lockSettingsDuringTimer: 'Lock Settings during Timer',
                         loadingAnimSetting: 'Show Loading Animation on Start',
+                        autoPiP: 'Auto Mini Mode (PiP)',
                         graphDisplay: 'Graph Display',
                         studyGraph: 'Show Study Time Graph',
                         graphType: 'Graph Type',
@@ -4384,6 +4410,7 @@
                         period14days: 'Last 14 Days',
                         period30days: 'Last 30 Days',
                         period90days: 'Last 90 Days',
+                        autoPiP: 'Auto Mini Mode (PiP)',
                         period1year: 'Last Year',
                         periodAll: 'All Time',
                         displayLocation: 'Display Location',
@@ -4546,13 +4573,13 @@
 
                         // General
                         confirmDefaultTitle: 'Confirm',
-                        studyTimeManagement: 'Study Time Manager',
+                        studyTimeManagement: 'Tsumiki | Study Time Manager',
                         cancelButton: 'Cancel',
 
                         // About & QA
                         aboutContent: `<div style="text-align: center; margin-bottom: 20px;">
                         <div><img src="guide.webp" style="width: 3rem; height: 3rem;"></div>
-                        <h3 style="margin-top: 0;">Study Time Manager</h3>
+                        <h3 style="margin-top: 0;">Tsumiki | Study Time Manager</h3>
                         <p>Simple and easy-to-use study time management tool.</p>
                         Developed by <a href="https://kokyujene.super-hiko14.com/members/super-hiko14/">Super Hiko14</a>.<div class="tyuui-mini-text">* AI is used in some parts.</div>
                         </div>`,
@@ -4624,6 +4651,7 @@
                     loadStats();
                     loadPlaylist();
                     loadTodos();
+                    drawPiPCanvas();
                 }
 
                 // すべての翻訳を適用
@@ -4928,15 +4956,31 @@
                     if (getData('graph_enabled') === 'true') {
                         setTimeout(() => updateGraphs(), 100);
                     }
+
+                    drawPiPCanvas();
+                }
+
+                const VALID_THEME_NAMES = ['blue', 'green', 'purple', 'orange', 'pink', 'teal', 'white'];
+
+                function normalizeThemeName(themeName) {
+                    const normalized = (themeName || '').trim().toLowerCase();
+                    return VALID_THEME_NAMES.includes(normalized) ? normalized : '';
                 }
 
                 function changeTheme(themeName) {
-                    document.body.setAttribute('data-theme', themeName);
-                    saveData('theme', themeName);
+                    const normalizedTheme = normalizeThemeName(themeName);
+                    if (!normalizedTheme) {
+                        console.warn('[Theme] Ignored invalid theme value:', themeName);
+                        return;
+                    }
+
+                    document.body.setAttribute('data-theme', normalizedTheme);
+                    saveData('theme', normalizedTheme);
+                    saveData('last_valid_theme', normalizedTheme);
                     document.querySelectorAll('.theme-option').forEach(option => {
                         option.classList.remove('selected');
                     });
-                    const matchedThemeOption = document.querySelector(`.theme-option[data-theme="${themeName}"]`);
+                    const matchedThemeOption = document.querySelector(`.theme-option[data-theme="${normalizedTheme}"]`);
                     if (matchedThemeOption) {
                         matchedThemeOption.classList.add('selected');
                     }
@@ -4944,6 +4988,143 @@
                     if (getData('graph_enabled') === 'true') {
                         setTimeout(() => updateGraphs(), 100);
                     }
+
+                    drawPiPCanvas();
+                }
+
+                function ensurePiPElements() {
+                    if (!pipCanvas) pipCanvas = document.getElementById('pipCanvas');
+                    if (!pipVideo) pipVideo = document.getElementById('pipVideo');
+                    if (pipCanvas && !pipCtx) pipCtx = pipCanvas.getContext('2d');
+                    if (pipVideo && !pipVideo.__pipBound) {
+                        pipVideo.addEventListener('leavepictureinpicture', cleanupPiPState);
+                        pipVideo.__pipBound = true;
+                    }
+                }
+
+                function isPiPSupported() {
+                    return !!(document.pictureInPictureEnabled && HTMLVideoElement.prototype.requestPictureInPicture && HTMLCanvasElement.prototype.captureStream);
+                }
+
+                function getActiveMusicTitle() {
+                    if (currentMusicIndex >= 0 && musicFiles[currentMusicIndex]) {
+                        return musicFiles[currentMusicIndex].title || 'Unknown track';
+                    }
+                    return currentLanguage === 'en' ? 'No music selected' : '音楽は選択されていません';
+                }
+
+                function getCssVar(name, fallback) {
+                    const value = getComputedStyle(document.body).getPropertyValue(name).trim();
+                    return value || fallback;
+                }
+
+                function trimCanvasText(ctx, text, maxWidth) {
+                    if (ctx.measureText(text).width <= maxWidth) return text;
+                    let out = text;
+                    while (out.length > 1 && ctx.measureText(`${out}…`).width > maxWidth) {
+                        out = out.slice(0, -1);
+                    }
+                    return `${out}…`;
+                }
+
+                function drawPiPCanvas() {
+                    ensurePiPElements();
+                    if (!pipCtx || !pipCanvas) return;
+
+                    const width = pipCanvas.width;
+                    const height = pipCanvas.height;
+                    const isDark = document.body.classList.contains('dark');
+                    const bg = isDark ? getCssVar('--panel-dark', '#2d3142') : getCssVar('--panel-light', '#f0f2f7');
+                    const panel = isDark ? getCssVar('--panel-dark-2', '#3d4454') : getCssVar('--bg-light', '#f8f9fb');
+                    const primary = isDark ? getCssVar('--primary-color-dark', '#7a95ab') : getCssVar('--primary-color', '#9db4c8');
+                    const textColor = isDark ? '#e8e8e8' : '#323232';
+                    const subText = isDark ? 'rgba(232,232,232,0.72)' : 'rgba(50,50,50,0.72)';
+                    const fontFamily = getComputedStyle(document.body).fontFamily || 'system-ui, sans-serif';
+                    
+                    let timerText = '00:00:00';
+                    const timerEl = document.getElementById('timer');
+                    if (timerEl) {
+                        timerText = timerEl.textContent.trim();
+                    }
+                    
+                    const songTitle = getActiveMusicTitle();
+
+                    pipCtx.clearRect(0, 0, width, height);
+                    pipCtx.fillStyle = bg;
+                    pipCtx.fillRect(0, 0, width, height);
+
+                    const bottomPanelHeight = Math.round(height * 0.24);
+                    pipCtx.fillStyle = panel;
+                    pipCtx.fillRect(0, height - bottomPanelHeight, width, bottomPanelHeight);
+
+                    pipCtx.fillStyle = textColor;
+                    pipCtx.textAlign = 'center';
+                    pipCtx.textBaseline = 'middle';
+                    pipCtx.font = `500 ${Math.round(height * 0.2)}px ${fontFamily}`;
+                    pipCtx.fillText(timerText, width / 2, Math.round(height * 0.42));
+
+                    pipCtx.fillStyle = primary;
+                    pipCtx.fillRect(Math.round(width * 0.1), height - bottomPanelHeight - 2, Math.round(width * 0.8), 2);
+
+                    pipCtx.textAlign = 'left';
+                    pipCtx.fillStyle = subText;
+                    pipCtx.font = `400 ${Math.round(height * 0.04)}px ${fontFamily}`;
+                    pipCtx.fillText('Now Playing', Math.round(width * 0.08), height - Math.round(bottomPanelHeight * 0.62));
+
+                    pipCtx.fillStyle = textColor;
+                    pipCtx.font = `500 ${Math.round(height * 0.052)}px ${fontFamily}`;
+                    const songAreaLeft = Math.round(width * 0.08);
+                    const songAreaWidth = Math.round(width * 0.84);
+                    const fitted = trimCanvasText(pipCtx, songTitle, songAreaWidth);
+                    pipCtx.fillText(fitted, songAreaLeft, height - Math.round(bottomPanelHeight * 0.34));
+                }
+
+                function cleanupPiPState() {
+                    if (pipDrawInterval) {
+                        clearInterval(pipDrawInterval);
+                        pipDrawInterval = null;
+                    }
+                    if (pipStream) {
+                        pipStream.getTracks().forEach(track => track.stop());
+                        pipStream = null;
+                    }
+                    if (pipVideo) {
+                        pipVideo.pause();
+                        pipVideo.srcObject = null;
+                    }
+                }
+
+                async function enterMiniModePiP() {
+                    ensurePiPElements();
+
+                    if (!isPiPSupported()) return;
+
+                    try {
+                        if (document.pictureInPictureElement === pipVideo) return;
+
+                        drawPiPCanvas();
+                        if (!pipStream) {
+                            pipStream = pipCanvas.captureStream(24);
+                            pipVideo.srcObject = pipStream;
+                        }
+                        await pipVideo.play();
+                        await pipVideo.requestPictureInPicture();
+
+                        if (pipDrawInterval) clearInterval(pipDrawInterval);
+                        pipDrawInterval = setInterval(drawPiPCanvas, 250);
+                    } catch (err) {
+                        console.error('Failed to launch PiP:', err);
+                        cleanupPiPState();
+                    }
+                }
+
+                async function exitMiniModePiP() {
+                    if (document.pictureInPictureElement === pipVideo) {
+                        try {
+                            await document.exitPictureInPicture();
+                        } catch (e) {}
+                    }
+                    cleanupPiPState();
                 }
 
                 function toggleFeature(feature) {
@@ -5245,6 +5426,8 @@
                         document.getElementById('timer').textContent = timeStr;
                         document.title = `${timeStr} - ${getText('studyTimeManagement')}`;
                     }
+
+                    drawPiPCanvas();
                 }
                 
 
@@ -5298,6 +5481,7 @@
 
                 function endStudy() {
                     if (timerInterval) clearInterval(timerInterval);
+                    exitMiniModePiP();
                     document.title = getText('studyTimeManagement');
                     const endTime = new Date();
                     const startCookie = getData('studyStartTime');
@@ -5384,6 +5568,7 @@
                     const playlistDiv = document.getElementById('playlist');
                     if (musicFiles.length === 0) {
                         playlistDiv.innerHTML = `<div class="empty-state">${getText('emptyPlaylist')}</div>`;
+                        drawPiPCanvas();
                         return;
                     }
                     playlistDiv.innerHTML = musicFiles.map((item, index) => `
@@ -5403,6 +5588,7 @@
         </div>
     `).join('');
                     attachPlaylistHandlers();
+                    drawPiPCanvas();
                 }
 
                 // エスケープ用(簡易)
@@ -5565,6 +5751,7 @@
                         if (playImg) { playImg.src = 'pause.webp'; playImg.alt = '一時停止'; }
                         loadPlaylist();
                         updateMediaSession(); // Media Session API更新
+                        drawPiPCanvas();
                     }
                 }
 
@@ -5577,7 +5764,7 @@
                     navigator.mediaSession.metadata = new MediaMetadata({
                         title: file.title,
                         // ユーザー要望のサブタイトル(Artist フィールドを利用)
-                        artist: 'Study Time Manager - Music',
+                        artist: 'Tsumiki | Study Time Manager - Music',
                         album: 'Local Playlist',
                         artwork: [
                             { src: 'music.png', sizes: '96x96', type: 'image/webp' },
@@ -5630,6 +5817,7 @@
                     }
                     // リスト上のplayingクラスは再生中も一時停止中もactiveで良いならそのままだが、
                     // 一時停止中にスタイルを変えたい場合はここで制御。今回は変更なし。
+                    drawPiPCanvas();
                 }
 
                 function togglePlay() {
@@ -6846,8 +7034,14 @@
                                 if (data.studyHistory) saveData('studyHistory', JSON.stringify(data.studyHistory));
                                 if (data.todos) saveData('todos', JSON.stringify(data.todos));
                                 if (data.theme) {
-                                    saveData('theme', data.theme);
-                                    changeTheme(data.theme);
+                                    const importedTheme = normalizeThemeName(data.theme);
+                                    if (importedTheme) {
+                                        saveData('theme', importedTheme);
+                                        saveData('last_valid_theme', importedTheme);
+                                        changeTheme(importedTheme);
+                                    } else if (data.theme === 'light' || data.theme === 'dark') {
+                                        saveData('mode', data.theme);
+                                    }
                                 }
                                 if (data.mode) {
                                     saveData('mode', data.mode);
@@ -6907,6 +7101,7 @@
 
                 // チュートリアル関連
                 let currentTutorialStep = 0;
+                let tutorialTimer = null;
                 const tutorialSteps = [
                     {
                         titleKey: 'tutorialStartTitle',
@@ -7015,7 +7210,7 @@
                     {
                         titleKey: 'tutorialGraphDisplayTitle',
                         messageKey: 'tutorialGraphDisplayMessage',
-                        target: '.settings-section:nth-child(3)',
+                        target: '.settings-section:nth-child(6)',
                         position: 'top',
                         action: 'view',
                         page: 'settings'
@@ -7023,7 +7218,7 @@
                     {
                         titleKey: 'tutorialDataManagementTitle',
                         messageKey: 'tutorialDataManagementMessage',
-                        target: '.settings-section:nth-child(4)',
+                        target: '.settings-section:nth-child(7)',
                         position: 'top',
                         action: 'view',
                         page: 'settings'
@@ -7057,11 +7252,13 @@
                 }
 
                 function restartTutorial() {
+                    hideTutorialStep();
                     currentTutorialStep = 0;
                     showPage('timer');
-                    setTimeout(() => {
+                    if (tutorialTimer) clearTimeout(tutorialTimer);
+                    tutorialTimer = setTimeout(() => {
                         showTutorialStep();
-                    }, 300);
+                    }, 500);
                 }
 
                 function skipTutorial() {
@@ -7093,9 +7290,10 @@
                         if (prevStep.page) {
                             showPage(prevStep.page);
                         }
-                        setTimeout(() => {
+                        if (tutorialTimer) clearTimeout(tutorialTimer);
+                        tutorialTimer = setTimeout(() => {
                             showTutorialStep();
-                        }, 300);
+                        }, 500);
                     }
                 }
 
@@ -7107,16 +7305,17 @@
 
                     // ページ切替が必要な場合
                     if (step.page) {
-                        const pages = { 'timer': 'timerPage', 'stats': 'statsPage', 'list': 'listPage', 'settings': 'settingsPage' };
+                        const pages = { 'timer': 'timerPage', 'stats': 'statsPage', 'list': 'listPage', 'music': 'musicPage', 'todo': 'todoPage', 'settings': 'settingsPage' };
                         const currentActivePage = document.querySelector('.page.active');
                         const targetPageId = pages[step.page];
 
                         if (currentActivePage && currentActivePage.id !== targetPageId) {
                             showPage(step.page);
                             // ページ切替後に少し待つ
-                            setTimeout(() => {
+                            if (tutorialTimer) clearTimeout(tutorialTimer);
+                            tutorialTimer = setTimeout(() => {
                                 continueShowingStep();
-                            }, 400);
+                            }, 500);
                             return;
                         }
                     }
@@ -7124,11 +7323,14 @@
                     continueShowingStep();
 
                     function continueShowingStep() {
+                        if (tutorialTimer) clearTimeout(tutorialTimer);
+                        
                         // 完了画面の場合
                         if (step.action === 'finish') {
                             overlay.classList.add('show');
                             box.style.display = 'block';
                             arrow.style.display = 'none';
+                            // ... (rest is same)
 
                             document.getElementById('tutorialStepInfo').textContent = '';
                             document.getElementById('tutorialStepInfo').textContent = '';
@@ -7173,11 +7375,26 @@
                         // ターゲットが表示されるまで待つ
                         const targetVisible = target.offsetParent !== null;
                         if (!targetVisible) {
-                            setTimeout(() => {
-                                showTutorialStep();
-                            }, 200);
+                            // タイマー起動中などで元々隠れている要素なら、延々と待たずに次へ
+                            if (target.classList.contains('hidden') || target.style.display === 'none') {
+                                nextTutorialStep();
+                                return;
+                            }
+                            
+                            if (tutorialTimer) clearTimeout(tutorialTimer);
+                            if (!step._retryCount) step._retryCount = 0;
+                            if (step._retryCount < 5) {
+                                step._retryCount++;
+                                tutorialTimer = setTimeout(() => {
+                                    showTutorialStep();
+                                }, 300);
+                            } else {
+                                step._retryCount = 0;
+                                nextTutorialStep();
+                            }
                             return;
                         }
+                        step._retryCount = 0;
 
                         overlay.classList.add('show');
                         box.style.display = 'block';
@@ -7326,6 +7543,10 @@
                 }
 
                 function hideTutorialStep() {
+                    if (tutorialTimer) {
+                        clearTimeout(tutorialTimer);
+                        tutorialTimer = null;
+                    }
                     document.getElementById('tutorialOverlay').classList.remove('show');
                     document.getElementById('tutorialBox').style.display = 'none';
                     document.getElementById('tutorialArrow').style.display = 'none';
@@ -7417,7 +7638,14 @@
                             if (e.key === 'theme') {
                                 console.log('[DEBUG] storage event theme changed:', e.oldValue, '=>', e.newValue);
                                 const newTheme = (e.newValue || '').trim();
-                                if (newTheme) changeTheme(newTheme);
+                                const normalizedTheme = normalizeThemeName(newTheme);
+                                if (normalizedTheme) {
+                                    changeTheme(normalizedTheme);
+                                } else if (newTheme === 'light' || newTheme === 'dark') {
+                                    saveData('mode', newTheme);
+                                    document.body.classList.toggle('dark', newTheme === 'dark');
+                                    document.body.classList.toggle('light', newTheme !== 'dark');
+                                }
                             }
                         });
 
@@ -7435,7 +7663,8 @@
                     }
 
                     const mode = getData('mode');
-                    const theme = (getData('theme') || '').trim();
+                    const rawTheme = (getData('theme') || '').trim();
+                    const theme = normalizeThemeName(rawTheme) || normalizeThemeName(getData('last_valid_theme'));
                     const themeIcon = document.getElementById('themeIcon');
                     if (mode === 'dark') {
                         document.body.classList.remove('light');
@@ -7443,8 +7672,13 @@
                         themeIcon.src = 'sun.webp';
                         themeIcon.alt = getText('toggleLightMode');
                     }
+                    if (rawTheme === 'light' || rawTheme === 'dark') {
+                        saveData('mode', rawTheme);
+                    }
                     if (theme) {
                         document.body.setAttribute('data-theme', theme);
+                        saveData('theme', theme);
+                        saveData('last_valid_theme', theme);
                         document.querySelectorAll('.theme-option').forEach(option => { option.classList.remove('selected'); });
                         const matchedThemeOption = document.querySelector(`.theme-option[data-theme="${theme}"]`);
                         if (matchedThemeOption) matchedThemeOption.classList.add('selected');
@@ -7612,6 +7846,11 @@
                         if (toggle) toggle.classList.add('active');
                     }
 
+                    if (getData('feature_auto_pip') !== 'false') { // デフォルトON
+                        const toggle = document.getElementById('toggleAutoPiP');
+                        if (toggle) toggle.classList.add('active');
+                    }
+
                     const loopImg = document.getElementById('loopBtnImg');
                     if (loopImg) {
                         loopImg.src = isLoop ? 'loop_on.webp' : 'loop_off.webp';
@@ -7679,6 +7918,47 @@
                         if (e.key === 'Enter') {
                             e.preventDefault();
                             addTodo();
+                        }
+                    });
+
+                    // 閲覧タブやウィンドウが切り替わった時に自動でミニモード（PiP）を起動
+                    document.addEventListener('visibilitychange', () => {
+                        if (document.visibilityState === 'hidden') {
+                            // 設定で有効な場合のみ自動起動
+                            if (getData('feature_auto_pip') !== 'false') {
+                                // タブが非表示になった時：タイマーが動いていて一時停止中でなければPiP起動
+                                if (startTime && !isPaused) {
+                                    enterMiniModePiP().catch(err => {
+                                        console.warn('Auto PiP blocked by browser security:', err);
+                                    });
+                                }
+                            }
+                        } else {
+                            // タブに戻ってきた時：PiPを終了
+                            if (document.pictureInPictureElement === pipVideo) {
+                                exitMiniModePiP();
+                            }
+                        }
+                    });
+
+                    // ウィンドウフォーカスが外れた時（別ウィンドウをクリックした時など）
+                    window.addEventListener('blur', () => {
+                        // 設定で有効な場合のみ自動起動
+                        if (getData('feature_auto_pip') !== 'false') {
+                            // タブ自体は表示されているが、ウィンドウのフォーカスが外れた場合
+                            if (startTime && !isPaused && document.visibilityState === 'visible') {
+                                enterMiniModePiP().catch(err => {
+                                    console.warn('Auto PiP blocked by browser security:', err);
+                                });
+                            }
+                        }
+                    });
+
+                    // ウィンドウにフォーカスが戻った時
+                    window.addEventListener('focus', () => {
+                        // タブが表示されている状態でフォーカスが戻った場合
+                        if (document.visibilityState === 'visible' && document.pictureInPictureElement === pipVideo) {
+                            exitMiniModePiP();
                         }
                     });
 
@@ -7833,6 +8113,19 @@
                     } else {
                         toggle.classList.add('active');
                         saveData('feature_loading_anim', 'true');
+                    }
+                }
+
+                function toggleAutoPiP() {
+                    const toggle = document.getElementById('toggleAutoPiP');
+                    const isActive = toggle.classList.contains('active');
+
+                    if (isActive) {
+                        toggle.classList.remove('active');
+                        saveData('feature_auto_pip', 'false');
+                    } else {
+                        toggle.classList.add('active');
+                        saveData('feature_auto_pip', 'true');
                     }
                 }
 
