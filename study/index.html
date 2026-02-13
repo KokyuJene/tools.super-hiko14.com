@@ -9,8 +9,7 @@
     <link rel="shortcut icon" type="image/webp" href="favicon.webp">
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
     <meta name="description" content="勉強とともにタイマーをスタートし、作業時間を記録しましょう。">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js">const todoInput = document.getElementById("todoInput"); todoInput.isComposing = false;
-    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <link
         href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@300;400&family=Hina+Mincho&family=JetBrains+Mono:wght@300;400&family=Jost:wght@300;400&family=Klee+One:wght@300;400&family=Lora:wght@400&family=Montserrat:wght@300;400&family=Noto+Sans+JP:wght@300;400&family=Quicksand:wght@300;400&family=Sawarabi+Gothic&family=Zen+Kaku+Gothic+Antique:wght@300;400;500;700&family=Zen+Maru+Gothic:wght@300;400&display=swap"
         rel="stylesheet">
@@ -4178,6 +4177,11 @@
                         confirmDefaultTitle: '確認',
                         studyTimeManagement: 'ツミキ | 勉強時間管理',
                         cancelButton: 'キャンセル',
+                        errorTitle: 'エラー',
+                        invalidFileFormat: '無効なファイル形式です。',
+                        importDataTitle: 'データをインポート',
+                        importConfirm: 'このデータを読み込みますか？\n履歴: {historyCount}件\nToDo: {todoCount}件',
+                        importFailed: 'インポートに失敗しました',
 
                         // About & QA
                         aboutContent: `<div style="text-align: center; margin-bottom: 20px;">
@@ -4458,6 +4462,11 @@
                         year: '/',
                         month: '/',
                         day: '',
+                        errorTitle: 'Error',
+                        invalidFileFormat: 'Invalid file format.',
+                        importDataTitle: 'Import Data',
+                        importConfirm: 'Import this data?\nHistory: {historyCount}\nToDo: {todoCount}',
+                        importFailed: 'Import failed',
 
                         notSet: 'Not set',
                         periodLabel: 'Period',
@@ -6985,17 +6994,151 @@
                     }
                 }
 
+                const EXPORT_SCHEMA_VERSION = 2;
+                const BACKUP_SETTING_KEYS = [
+                    'theme',
+                    'last_valid_theme',
+                    'mode',
+                    'app_language',
+                    'font_ja',
+                    'font_en',
+                    'feature_music',
+                    'feature_todo',
+                    'feature_title_time',
+                    'feature_loading_anim',
+                    'feature_auto_pip',
+                    'lock_settings_during_timer',
+                    'feature_focus_mode_display',
+                    'focus_mode_enabled',
+                    'focus_duration',
+                    'break_duration',
+                    'graph_enabled',
+                    'graph_type',
+                    'graph_period',
+                    'graph_location',
+                    'todo_v2_enabled',
+                    'todo_v2_prompt_shown',
+                    'tutorial_completed',
+                    'dev_mode_enabled'
+                ];
+
+                const IMPORT_BOOLEAN_SETTING_KEYS = [
+                    'feature_music',
+                    'feature_todo',
+                    'feature_title_time',
+                    'feature_loading_anim',
+                    'feature_auto_pip',
+                    'lock_settings_during_timer',
+                    'feature_focus_mode_display',
+                    'focus_mode_enabled',
+                    'graph_enabled',
+                    'todo_v2_enabled',
+                    'todo_v2_prompt_shown',
+                    'tutorial_completed',
+                    'dev_mode_enabled'
+                ];
+
+                function safeJsonParse(raw, fallback) {
+                    if (typeof raw !== 'string') return fallback;
+                    try {
+                        const parsed = JSON.parse(raw);
+                        return parsed ?? fallback;
+                    } catch {
+                        return fallback;
+                    }
+                }
+
+                function normalizeBooleanString(value, fallback = 'false') {
+                    if (typeof value === 'boolean') return value ? 'true' : 'false';
+                    if (typeof value === 'string') {
+                        const normalized = value.trim().toLowerCase();
+                        if (normalized === 'true' || normalized === 'false') return normalized;
+                    }
+                    return fallback;
+                }
+
+                function normalizePositiveIntString(value, fallback) {
+                    const num = Number(value);
+                    if (!Number.isFinite(num)) return fallback;
+                    const intValue = Math.floor(num);
+                    if (intValue <= 0) return fallback;
+                    return String(intValue);
+                }
+
+                function collectExportSettings() {
+                    const settings = {};
+                    for (const key of BACKUP_SETTING_KEYS) {
+                        const value = getData(key);
+                        if (value !== null && value !== undefined && value !== '') {
+                            settings[key] = value;
+                        }
+                    }
+                    return settings;
+                }
+
+                function buildNormalizedImportData(parsedData) {
+                    if (!parsedData || typeof parsedData !== 'object' || Array.isArray(parsedData)) {
+                        throw new Error(getText('invalidFileFormat'));
+                    }
+
+                    const hasLegacyShape = (
+                        Object.prototype.hasOwnProperty.call(parsedData, 'studyHistory') ||
+                        Object.prototype.hasOwnProperty.call(parsedData, 'todos') ||
+                        Object.prototype.hasOwnProperty.call(parsedData, 'theme') ||
+                        Object.prototype.hasOwnProperty.call(parsedData, 'mode')
+                    );
+
+                    const hasSchemaMeta = typeof parsedData.version === 'number' || typeof parsedData.version === 'string';
+                    if (!hasLegacyShape && !hasSchemaMeta) {
+                        throw new Error(getText('invalidFileFormat'));
+                    }
+
+                    const settings = (parsedData.settings && typeof parsedData.settings === 'object' && !Array.isArray(parsedData.settings))
+                        ? parsedData.settings
+                        : {};
+
+                    const studyHistory = Array.isArray(parsedData.studyHistory) ? parsedData.studyHistory : [];
+                    const todos = Array.isArray(parsedData.todos) ? parsedData.todos : [];
+
+                    return {
+                        studyHistory,
+                        todos,
+                        settings,
+                        legacy: parsedData
+                    };
+                }
+
+                function applyMode(mode) {
+                    const normalizedMode = mode === 'dark' ? 'dark' : 'light';
+                    saveData('mode', normalizedMode);
+                    document.body.classList.toggle('dark', normalizedMode === 'dark');
+                    document.body.classList.toggle('light', normalizedMode !== 'dark');
+                    const themeIcon = document.getElementById('themeIcon');
+                    if (themeIcon) {
+                        themeIcon.src = normalizedMode === 'dark' ? 'sun.webp' : 'moon.webp';
+                        themeIcon.alt = normalizedMode === 'dark' ? getText('toggleLightMode') : getText('toggleDarkMode');
+                    }
+                }
+
+                function setToggleActive(toggleId, isActive) {
+                    const toggle = document.getElementById(toggleId);
+                    if (!toggle) return;
+                    toggle.classList.toggle('active', isActive);
+                }
+
                 function exportData() {
+                    const studyHistory = safeJsonParse(getData('studyHistory') || '[]', []);
+                    const todos = safeJsonParse(getData('todos') || '[]', []);
+                    const settings = collectExportSettings();
+
                     const data = {
-                        version: 1,
+                        version: EXPORT_SCHEMA_VERSION,
+                        app: 'tsumiki-study',
                         exportedAt: new Date().toISOString(),
-                        studyHistory: JSON.parse(getData('studyHistory') || '[]'),
-                        todos: JSON.parse(getData('todos') || '[]'),
-                        theme: getData('theme') || 'blue',
-                        mode: getData('mode') || 'light',
-                        feature_music: getData('feature_music') || 'false',
-                        feature_todo: getData('feature_todo') || 'false',
-                        focus_mode_enabled: getData('focus_mode_enabled') || 'false',
+                        studyHistory: Array.isArray(studyHistory) ? studyHistory : [],
+                        todos: Array.isArray(todos) ? todos : [],
+                        settings,
+                        excludes: ['musicPlaylist', 'indexedDB:study_music_db']
                     };
 
                     const json = JSON.stringify(data, null, 2);
@@ -7017,77 +7160,144 @@
                     const reader = new FileReader();
                     reader.onload = async (e) => {
                         try {
-                            const data = JSON.parse(e.target.result);
-
-                            // バージョン確認
-                            if (!data.version) throw new Error(getText('invalidFileFormat'));
+                            const parsedData = JSON.parse(e.target.result);
+                            const normalized = buildNormalizedImportData(parsedData);
+                            const { studyHistory, todos, settings, legacy } = normalized;
 
                             // 確認ダイアログを表示
                             const confirmed = await customConfirm(
-                                getText('importConfirm').replace('{historyCount}', data.studyHistory?.length || 0).replace('{todoCount}', data.todos?.length || 0),
+                                getText('importConfirm').replace('{historyCount}', studyHistory.length || 0).replace('{todoCount}', todos.length || 0),
                                 getText('importDataTitle'),
                                 'warning.webp'
                             );
 
                             if (confirmed) {
                                 // データを復元
-                                if (data.studyHistory) saveData('studyHistory', JSON.stringify(data.studyHistory));
-                                if (data.todos) saveData('todos', JSON.stringify(data.todos));
-                                if (data.theme) {
-                                    const importedTheme = normalizeThemeName(data.theme);
+                                saveData('studyHistory', JSON.stringify(studyHistory));
+                                saveData('todos', JSON.stringify(todos));
+
+                                for (const key of IMPORT_BOOLEAN_SETTING_KEYS) {
+                                    const rawValue = settings[key] ?? legacy[key];
+                                    if (typeof rawValue !== 'undefined') {
+                                        saveData(key, normalizeBooleanString(rawValue));
+                                    }
+                                }
+
+                                const importedFocusDuration = settings.focus_duration ?? legacy.focus_duration;
+                                if (typeof importedFocusDuration !== 'undefined') {
+                                    saveData('focus_duration', normalizePositiveIntString(importedFocusDuration, '25'));
+                                }
+
+                                const importedBreakDuration = settings.break_duration ?? legacy.break_duration;
+                                if (typeof importedBreakDuration !== 'undefined') {
+                                    saveData('break_duration', normalizePositiveIntString(importedBreakDuration, '5'));
+                                }
+
+                                const importedGraphType = String(settings.graph_type ?? legacy.graph_type ?? '').trim();
+                                if (['bar', 'line', 'area'].includes(importedGraphType)) {
+                                    saveData('graph_type', importedGraphType);
+                                }
+
+                                const importedGraphPeriod = String(settings.graph_period ?? legacy.graph_period ?? '').trim();
+                                if (['7', '14', '30', '90', '365', 'all'].includes(importedGraphPeriod)) {
+                                    saveData('graph_period', importedGraphPeriod);
+                                }
+
+                                const importedGraphLocation = String(settings.graph_location ?? legacy.graph_location ?? '').trim();
+                                if (['list', 'stats', 'both'].includes(importedGraphLocation)) {
+                                    saveData('graph_location', importedGraphLocation);
+                                }
+
+                                const importedThemeRaw = settings.theme ?? legacy.theme;
+                                if (typeof importedThemeRaw === 'string') {
+                                    const importedTheme = normalizeThemeName(importedThemeRaw);
                                     if (importedTheme) {
                                         saveData('theme', importedTheme);
                                         saveData('last_valid_theme', importedTheme);
                                         changeTheme(importedTheme);
-                                    } else if (data.theme === 'light' || data.theme === 'dark') {
-                                        saveData('mode', data.theme);
                                     }
                                 }
-                                if (data.mode) {
-                                    saveData('mode', data.mode);
-                                    if (data.mode === 'dark') {
-                                        document.body.classList.remove('light');
-                                        document.body.classList.add('dark');
-                                    } else {
-                                        document.body.classList.remove('dark');
-                                        document.body.classList.add('light');
-                                    }
-                                    const themeIcon = document.getElementById('themeIcon');
-                                    if (themeIcon) themeIcon.src = data.mode === 'dark' ? 'sun.webp' : 'moon.webp';
-                                }
-                                if (typeof data.focus_mode_enabled !== 'undefined') {
-                                    saveData('focus_mode_enabled', data.focus_mode_enabled);
-                                }
-                                // break_time_accum and focus_cycle_base are no longer needed (stateless computation)
 
-                                // 表示設定を復元
-                                if (data.feature_music !== undefined) {
-                                    saveData('feature_music', data.feature_music);
-                                    const toggle = document.getElementById('toggleMusic');
-                                    if (data.feature_music === 'true') {
-                                        toggle.classList.add('active');
-                                        addMenuButton('music');
-                                    } else {
-                                        toggle.classList.remove('active');
-                                        removeMenuButton('music');
-                                    }
+                                const importedModeRaw = settings.mode ?? legacy.mode;
+                                if (typeof importedModeRaw === 'string') {
+                                    applyMode(importedModeRaw.trim().toLowerCase() === 'dark' ? 'dark' : 'light');
                                 }
-                                if (data.feature_todo !== undefined) {
-                                    saveData('feature_todo', data.feature_todo);
-                                    const toggle = document.getElementById('toggleTodo');
-                                    if (data.feature_todo === 'true') {
-                                        toggle.classList.add('active');
-                                        addMenuButton('todo');
-                                    } else {
-                                        toggle.classList.remove('active');
-                                        removeMenuButton('todo');
-                                    }
+
+                                const importedLanguage = String(settings.app_language ?? legacy.app_language ?? '').trim().toLowerCase();
+                                if (importedLanguage === 'ja' || importedLanguage === 'en') {
+                                    saveData('app_language', importedLanguage);
                                 }
+
+                                const importedFontJa = settings.font_ja ?? legacy.font_ja;
+                                if (typeof importedFontJa === 'string' && importedFontJa.trim() !== '') {
+                                    saveData('font_ja', importedFontJa.trim());
+                                }
+
+                                const importedFontEn = settings.font_en ?? legacy.font_en;
+                                if (typeof importedFontEn === 'string') {
+                                    saveData('font_en', importedFontEn.trim());
+                                }
+
+                                const featureMusicEnabled = getData('feature_music') === 'true';
+                                setToggleActive('toggleMusic', featureMusicEnabled);
+                                if (featureMusicEnabled) addMenuButton('music');
+                                else removeMenuButton('music');
+
+                                const featureTodoEnabled = getData('feature_todo') === 'true';
+                                setToggleActive('toggleTodo', featureTodoEnabled);
+                                if (featureTodoEnabled) addMenuButton('todo');
+                                else removeMenuButton('todo');
+
+                                setToggleActive('toggleTitleTime', getData('feature_title_time') !== 'false');
+                                setToggleActive('toggleLoadingAnim', getData('feature_loading_anim') !== 'false');
+                                setToggleActive('toggleAutoPiP', getData('feature_auto_pip') !== 'false');
+                                setToggleActive('toggleLockSettings', getData('lock_settings_during_timer') === 'true');
+                                setToggleActive('toggleFocusDisplay', getData('feature_focus_mode_display') !== 'false');
+
+                                const focusDisplayEnabled = getData('feature_focus_mode_display') !== 'false';
+                                const focusModeToggleContainer = document.getElementById('focusModeToggleContainer');
+                                if (focusModeToggleContainer) {
+                                    focusModeToggleContainer.style.display = focusDisplayEnabled ? 'block' : 'none';
+                                }
+
+                                const graphEnabled = getData('graph_enabled') === 'true';
+                                setToggleActive('toggleGraph', graphEnabled);
+                                const graphSettings = document.getElementById('graphSettings');
+                                if (graphSettings) {
+                                    graphSettings.style.display = graphEnabled ? 'block' : 'none';
+                                }
+
+                                const graphTypeEl = document.getElementById('graphType');
+                                if (graphTypeEl && getData('graph_type')) graphTypeEl.value = getData('graph_type');
+                                const graphPeriodEl = document.getElementById('graphPeriod');
+                                if (graphPeriodEl && getData('graph_period')) graphPeriodEl.value = getData('graph_period');
+                                const graphLocationEl = document.getElementById('graphLocation');
+                                if (graphLocationEl && getData('graph_location')) graphLocationEl.value = getData('graph_location');
+
+                                const focusDurationEl = document.getElementById('focusDurationSelect');
+                                if (focusDurationEl && getData('focus_duration')) focusDurationEl.value = getData('focus_duration');
+                                const breakDurationEl = document.getElementById('breakDurationSelect');
+                                if (breakDurationEl && getData('break_duration')) breakDurationEl.value = getData('break_duration');
+
+                                applyFonts();
+
+                                const languageAfterImport = getData('app_language');
+                                if (languageAfterImport === 'ja' || languageAfterImport === 'en') {
+                                    currentLanguage = languageAfterImport;
+                                }
+                                applyTranslations();
 
                                 // 履歴をリロード
                                 if (document.getElementById('historyList')) loadHistory();
                                 if (document.getElementById('todoItems')) loadTodos();
                                 if (document.getElementById('statsContainer')) loadStats();
+                                if (getData('graph_enabled') === 'true') {
+                                    setTimeout(() => updateGraphs(), 80);
+                                } else {
+                                    hideGraphs();
+                                }
+                                toggleFocusModeMain(true);
+                                updateSettingsButtonState();
                             }
                         } catch (error) {
                             await customConfirm(`${getText('importFailed')}: ${error.message}`, getText('errorTitle'), 'warning.webp');
@@ -8018,6 +8228,14 @@
                     setTimeout(() => {
                         showTutorialWelcome();
                     }, 500);
+                    const rawGraphEnabled = getData('graph_enabled');
+                    if (rawGraphEnabled === null) {
+                        saveData('graph_enabled', 'true');
+                        saveData('graph_type', 'bar');
+                        saveData('graph_period', '30');
+                        saveData('graph_location', 'list');
+                    }
+
                     const graphEnabled = getData('graph_enabled') === 'true';
                     if (graphEnabled) {
                         document.getElementById('toggleGraph').classList.add('active');
@@ -8033,14 +8251,9 @@
 
                         setTimeout(() => updateGraphs(), 200);
                     } else {
-                        // グラフが無効の場合はデフォルト設定を適用
-                        setCookie('graph_enabled', 'true');
-                        setCookie('graph_type', 'bar');
-                        setCookie('graph_period', '30');
-                        setCookie('graph_location', 'list');
-                        document.getElementById('toggleGraph').classList.add('active');
-                        document.getElementById('graphSettings').style.display = 'block';
-                        setTimeout(() => updateGraphs(), 200);
+                        document.getElementById('toggleGraph').classList.remove('active');
+                        document.getElementById('graphSettings').style.display = 'none';
+                        hideGraphs();
                     }
 
                     // ショートカットキーの処理
@@ -8372,14 +8585,15 @@
                 }
 
                 const todoInput = document.getElementById("todoInput");
+                if (todoInput) {
+                    todoInput.addEventListener("compositionstart", () => {
+                        todoInput.isComposing = true;
+                    });
 
-                todoInput.addEventListener("compositionstart", () => {
-                    todoInput.isComposing = true;
-                });
-
-                todoInput.addEventListener("compositionend", () => {
-                    todoInput.isComposing = false;
-                });
+                    todoInput.addEventListener("compositionend", () => {
+                        todoInput.isComposing = false;
+                    });
+                }
 
                 // ToDo Ver.2 初期化
                 function initTodoV2() {
