@@ -3921,6 +3921,8 @@
                 let pipVideo = null;
                 let pipStream = null;
                 let pipDrawInterval = null;
+                let pipNeedsGestureUnlock = false;
+                let lastPiPEnterAt = 0;
 
                 // 多言語対応システム
                 let currentLanguage = 'ja'; // デフォルトは日本語
@@ -5015,6 +5017,15 @@
                     return !!(document.pictureInPictureEnabled && HTMLVideoElement.prototype.requestPictureInPicture && HTMLCanvasElement.prototype.captureStream);
                 }
 
+                function isLikelyMobileBrowser() {
+                    const ua = navigator.userAgent || '';
+                    return /Android|iPhone|iPad|iPod/i.test(ua);
+                }
+
+                function isAutoPiPEnabled() {
+                    return getData('feature_auto_pip') !== 'false';
+                }
+
                 function getActiveMusicTitle() {
                     if (currentMusicIndex >= 0 && musicFiles[currentMusicIndex]) {
                         return musicFiles[currentMusicIndex].title || 'Unknown track';
@@ -5106,10 +5117,11 @@
                 async function enterMiniModePiP() {
                     ensurePiPElements();
 
-                    if (!isPiPSupported()) return;
+                    if (!isPiPSupported()) return false;
+                    if (isLikelyMobileBrowser()) return false;
 
                     try {
-                        if (document.pictureInPictureElement === pipVideo) return;
+                        if (document.pictureInPictureElement === pipVideo) return true;
 
                         drawPiPCanvas();
                         if (!pipStream) {
@@ -5118,13 +5130,48 @@
                         }
                         await pipVideo.play();
                         await pipVideo.requestPictureInPicture();
+                        pipNeedsGestureUnlock = false;
+                        lastPiPEnterAt = Date.now();
 
                         if (pipDrawInterval) clearInterval(pipDrawInterval);
                         pipDrawInterval = setInterval(drawPiPCanvas, 250);
+                        return true;
                     } catch (err) {
-                        console.error('Failed to launch PiP:', err);
+                        const message = (err && err.message) ? String(err.message) : '';
+                        const blockedByGesture = err && (err.name === 'NotAllowedError' || /user activation|gesture/i.test(message));
+                        if (blockedByGesture) {
+                            pipNeedsGestureUnlock = true;
+                            console.warn('PiP blocked until user gesture is provided:', err);
+                        } else {
+                            console.error('Failed to launch PiP:', err);
+                        }
                         cleanupPiPState();
+                        return false;
                     }
+                }
+
+                async function prepareAutoPiPByUserGesture() {
+                    if (!isAutoPiPEnabled()) return;
+                    if (!isPiPSupported()) return;
+                    if (isLikelyMobileBrowser()) return;
+                    if (!startTime || isPaused) return;
+
+                    const alreadyPrimed = getData('auto_pip_primed') === 'true';
+                    if (alreadyPrimed && !pipNeedsGestureUnlock) return;
+
+                    ensurePiPElements();
+                    drawPiPCanvas();
+                    if (!pipStream) {
+                        pipStream = pipCanvas.captureStream(24);
+                        pipVideo.srcObject = pipStream;
+                    }
+                    await pipVideo.play();
+
+                    if (pipDrawInterval) clearInterval(pipDrawInterval);
+                    pipDrawInterval = setInterval(drawPiPCanvas, 250);
+
+                    saveData('auto_pip_primed', 'true');
+                    pipNeedsGestureUnlock = false;
                 }
 
                 async function exitMiniModePiP() {
@@ -5465,6 +5512,11 @@
                         document.getElementById('timer').style.fontSize = '3.5rem';
                         updateTimer(); // Initial update
                     }
+
+                    // Chrome系などの「ユーザー操作必須」制約に備えて、開始クリック時にPiPを事前解錠
+                    prepareAutoPiPByUserGesture().catch(err => {
+                        console.warn('Auto PiP prepare failed:', err);
+                    });
                 }
 
                 function pauseStudy() {
@@ -8056,9 +8108,21 @@
                         if (toggle) toggle.classList.add('active');
                     }
 
-                    if (getData('feature_auto_pip') !== 'false') { // デフォルトON
+                    if (isAutoPiPEnabled()) { // デフォルトON
                         const toggle = document.getElementById('toggleAutoPiP');
                         if (toggle) toggle.classList.add('active');
+                    }
+
+                    if (!isPiPSupported() || isLikelyMobileBrowser()) {
+                        const toggle = document.getElementById('toggleAutoPiP');
+                        if (toggle) {
+                            toggle.classList.remove('active');
+                            toggle.style.opacity = '0.45';
+                            toggle.style.pointerEvents = 'none';
+                            toggle.title = 'このブラウザでは自動ミニモード（PiP）は利用できません';
+                        }
+                        saveData('feature_auto_pip', 'false');
+                        saveData('auto_pip_primed', 'false');
                     }
 
                     const loopImg = document.getElementById('loopBtnImg');
@@ -8135,7 +8199,7 @@
                     document.addEventListener('visibilitychange', () => {
                         if (document.visibilityState === 'hidden') {
                             // 設定で有効な場合のみ自動起動
-                            if (getData('feature_auto_pip') !== 'false') {
+                            if (isAutoPiPEnabled()) {
                                 // タブが非表示になった時：タイマーが動いていて一時停止中でなければPiP起動
                                 if (startTime && !isPaused) {
                                     enterMiniModePiP().catch(err => {
@@ -8154,7 +8218,7 @@
                     // ウィンドウフォーカスが外れた時（別ウィンドウをクリックした時など）
                     window.addEventListener('blur', () => {
                         // 設定で有効な場合のみ自動起動
-                        if (getData('feature_auto_pip') !== 'false') {
+                        if (isAutoPiPEnabled()) {
                             // タブ自体は表示されているが、ウィンドウのフォーカスが外れた場合
                             if (startTime && !isPaused && document.visibilityState === 'visible') {
                                 enterMiniModePiP().catch(err => {
@@ -8166,6 +8230,8 @@
 
                     // ウィンドウにフォーカスが戻った時
                     window.addEventListener('focus', () => {
+                        // PiP起動直後のフォーカス競合で即終了しないように猶予を設ける
+                        if (Date.now() - lastPiPEnterAt < 1200) return;
                         // タブが表示されている状態でフォーカスが戻った場合
                         if (document.visibilityState === 'visible' && document.pictureInPictureElement === pipVideo) {
                             exitMiniModePiP();
@@ -8336,9 +8402,13 @@
                     if (isActive) {
                         toggle.classList.remove('active');
                         saveData('feature_auto_pip', 'false');
+                        saveData('auto_pip_primed', 'false');
+                        pipNeedsGestureUnlock = false;
                     } else {
                         toggle.classList.add('active');
                         saveData('feature_auto_pip', 'true');
+                        // 有効化直後に、タイマー動作中なら次回ユーザー操作で解錠を試す
+                        pipNeedsGestureUnlock = true;
                     }
                 }
 
