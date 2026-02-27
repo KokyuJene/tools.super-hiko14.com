@@ -5553,8 +5553,8 @@
                         if (isNaN(start.getTime())) {
                             console.warn('Invalid stored start time:', startCookie);
                         } else {
-                            // 終了時刻 - 保存された開始時刻 を使って計算
-                            const rawWallTime = isPaused ? pausedTime : (endTime.getTime() - start.getTime() + pausedTime);
+                            // 実際の計測値(一時停止除外)はタイマー表示と同じ計算式で算出
+                            const rawWallTime = isPaused ? pausedTime : (Date.now() - startTime + pausedTime);
                             // フォーカスモード有効時は休憩時間を除外
                             let actualStudyTime = rawWallTime;
                             if (focusEnabled) {
