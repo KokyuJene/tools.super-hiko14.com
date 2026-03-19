@@ -73,7 +73,7 @@ body {
 #nav-pages {
   flex: 1; overflow-y: auto; overflow-x: hidden;
   width: 100%; display: flex; flex-direction: column;
-  align-items: center; gap: 3px; padding: 0 9px;
+  align-items: center; gap: 3px; padding: 4px 9px;
 }
 #nav-pages::-webkit-scrollbar { width: 0; }
 
@@ -107,18 +107,68 @@ body {
 }
 .tip-r:hover::after { opacity: 1; }
 
-/* Trash icon on page row */
-.nav-trash {
-  position: absolute; right: -2px; top: 50%; transform: translateY(-50%);
-  width: 18px; height: 18px; border-radius: 24px;
-  border: none; background: var(--paper2);
-  display: flex; align-items: center; justify-content: center;
-  color: var(--ink3); cursor: pointer;
+/* Desktop Page Popover with Trash */
+#page-popover {
+  position: fixed;
+  transform: translateY(-50%);
+  background: var(--ink); color: var(--acc-fg);
+  border-radius: 24px;
+  display: flex; align-items: center; gap: 8px;
+  padding: 4px 4px 4px 14px;
+  box-shadow: 0 4px 12px var(--shadow);
   opacity: 0; pointer-events: none;
-  transition: opacity .15s, color .15s; z-index: 5;
+  transition: opacity .15s;
+  z-index: 1000;
 }
-.nav-page-wrap:hover .nav-trash { opacity: 1; pointer-events: all; }
-.nav-trash:hover { color: #B44; }
+#page-popover.show {
+  opacity: 1; pointer-events: all;
+}
+#page-popover::before {
+  content: '';
+  position: absolute;
+  left: -16px; top: 0; bottom: 0; width: 16px;
+  background: transparent;
+}
+.nav-popover-title {
+  font-size: 11px; font-family: var(--ui-font);
+  white-space: nowrap; max-width: 160px;
+  overflow: hidden; text-overflow: ellipsis;
+  cursor: pointer;
+}
+.nav-popover-trash {
+  width: 24px; height: 24px; border-radius: 50%;
+  border: none; background: rgba(255,255,255,0.15);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--acc-fg); cursor: pointer;
+  transition: background .15s, color .15s;
+  flex-shrink: 0;
+}
+.nav-popover-trash:hover {
+  background: #C0392B; color: #fff;
+}
+body.dark .nav-popover-trash {
+  background: rgba(0,0,0,0.12);
+}
+body.dark .nav-popover-trash:hover {
+  background: #C0392B; color: #fff;
+}
+
+/* Drag & Drop */
+.nav-page-wrap.dragging { opacity: 0.2; }
+.mpl-item.dragging { opacity: 0.4; }
+.nav-page-wrap.drop-target-above::before,
+.nav-page-wrap.drop-target-below::after {
+  content: ''; position: absolute; left: 0; right: 0;
+  height: 2px; background: var(--ink); z-index: 10; border-radius: 1px;
+}
+.nav-page-wrap.drop-target-above::before { top: -2px; }
+.nav-page-wrap.drop-target-below::after { bottom: -2px; }
+
+.mpl-item.drag-over { position: relative; }
+.mpl-item.drag-over::before {
+  content: ''; position: absolute; top: -2px; left: 12px; right: 12px;
+  height: 2px; background: var(--ink); z-index: 10; border-radius: 1px;
+}
 
 #nav-add {
   width: 38px; height: 38px; margin: 2px 9px 0;
@@ -199,10 +249,107 @@ body {
 }
 #font-chip:hover { border-color: var(--ink3); color: var(--ink); }
 
+/* Todo elements */
+.todo-wrap {
+  display: inline-flex; align-items: center; justify-content: center;
+  vertical-align: -4px; margin: 0 4px 0 2px;
+  user-select: none; position: relative;
+  width: 20px; height: 20px;
+}
+.todo-check-custom {
+  width: 18px; height: 18px; border: 2px solid var(--ink3);
+  border-radius: 6px; cursor: pointer; transition: all .15s;
+  background: transparent; position: relative;
+}
+.todo-wrap[data-checked="true"] .todo-check-custom {
+  background: var(--ink); border-color: var(--ink);
+}
+.todo-wrap[data-checked="true"] .todo-check-custom::after {
+  content: ''; position: absolute; left: 4px; top: 1px;
+  width: 5px; height: 9px; border: solid white;
+  border-width: 0 2px 2px 0; transform: rotate(45deg);
+}
+.todo-settings-trigger {
+  position: absolute; left: -24px; top: 50%; transform: translateY(-50%);
+  width: 22px; height: 22px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--ink3); cursor: pointer; opacity: 0; transition: opacity .15s, background .15s;
+}
+#content-area:focus-within .todo-wrap:hover .todo-settings-trigger {
+  opacity: 1;
+}
+.todo-settings-trigger:hover {
+  background: var(--hover); color: var(--ink);
+}
+
 /* ── Editor ── */
 #editor-scroll { flex: 1; overflow-y: auto; padding: 68px 0 80px; }
 #editor-scroll::-webkit-scrollbar { width: 0; }
-#editor-inner { max-width: 660px; margin: 0 auto; padding: 0 52px; }
+#editor-inner { max-width: 660px; margin: 0 auto; padding: 0 52px; position: relative; }
+
+#hover-menu-container {
+  position: absolute;
+  background: var(--paper); border: 1px solid var(--line);
+  border-radius: 20px; box-shadow: 0 4px 16px var(--shadow);
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.15s, top 0.1s, left 0.1s, max-width 0.25s cubic-bezier(.4,0,.2,1);
+  z-index: 100; overflow: hidden;
+  height: 38px; max-width: 38px;
+  transform: translateY(-50%);
+  display: flex; align-items: center;
+  -webkit-tap-highlight-color: transparent;
+}
+@media (max-width: 640px) {
+  #hover-menu-container { height: 38px; max-width: 38px; border-radius: 19px; }
+  #hover-menu-container.expanded {
+    left: 10px !important; right: 10px !important; 
+    max-width: none !important; width: auto !important;
+    height: auto !important; padding: 4px 2px;
+    border-radius: 18px;
+  }
+}
+
+#hover-menu-container.show { opacity: 1; pointer-events: all; }
+#hover-menu-container.expanded { max-width: 380px; }
+
+/* Hide menu when mobile panel or modals are open */
+body:has(#mobile-page-panel.open) #hover-menu-container,
+body:has(#modal-overlay.open) #hover-menu-container {
+  display: none !important;
+}
+
+.hm-inner { display: flex; align-items: center; width: max-content; height: 100%; position: relative; }
+@media (max-width: 640px) {
+    #hover-menu-container.expanded .hm-inner { width: 100%; flex-wrap: wrap; justify-content: center; align-content: flex-start; padding-top: 2px; }
+}
+
+.hm-trigger-icon {
+  width: 38px; height: 38px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--ink3); flex-shrink: 0; cursor: pointer;
+  transition: opacity 0.2s, transform 0.22s cubic-bezier(.4,0,.2,1);
+}
+@media (max-width: 640px) { 
+  .hm-trigger-icon { width: 32px; height: 32px; } 
+  #hover-menu-container.expanded .hm-trigger-icon { 
+    position: absolute; top: 4px; right: 6px; 
+    width: 24px; height: 24px; z-index: 10;
+  }
+}
+#hover-menu-container.expanded .hm-trigger-icon { transform: rotate(180deg); color: var(--ink4); }
+
+.hm-items {
+  display: flex; align-items: center; gap: 2px;
+  padding: 0 8px 0 2px;
+  opacity: 0; width: 0; overflow: hidden; pointer-events: none;
+  transition: opacity 0.18s 0.05s, width 0.25s cubic-bezier(.4,0,.2,1);
+}
+@media (max-width: 640px) {
+  #hover-menu-container.expanded .hm-items { flex-wrap: wrap; justify-content: center; padding: 2px 4px; gap: 4px; width: 100%; overflow: visible; }
+}
+#hover-menu-container.expanded .hm-items { opacity: 1; width: auto; pointer-events: all; overflow: visible; }
+
+.hm-close-icon { display: none; }
 
 #title-input {
   width: 100%; font-size: clamp(26px,4vw,46px);
@@ -316,9 +463,20 @@ body {
     padding: 13px 12px; border-radius: 24px; cursor: pointer;
     transition: background .15s; margin-bottom: 2px;
     -webkit-tap-highlight-color: transparent;
+    position: relative;
   }
   .mpl-item:hover, .mpl-item:active { background: var(--hover); }
   .mpl-item.active { background: var(--active); }
+  
+  /* Straight insertion line indicator */
+  .mpl-item.drop-target-above::before,
+  .mpl-item.drop-target-below::after {
+    content: ''; position: absolute; left: 12px; right: 12px;
+    height: 2px; background: var(--ink); z-index: 10;
+    border-radius: 1px;
+  }
+  .mpl-item.drop-target-above::before { top: -2px; }
+  .mpl-item.drop-target-below::after { bottom: -2px; }
   .mpl-item-title { font-size: 15px; color: var(--ink); font-family: var(--ui-font); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .mpl-item.active .mpl-item-title { font-weight: 600; }
   .mpl-trash { background: none; border: none; color: var(--ink3); cursor: pointer; padding: 6px; display: flex; align-items: center; flex-shrink: 0; -webkit-tap-highlight-color: transparent; }
@@ -436,13 +594,20 @@ body.dark #del-icon { background: rgba(192,57,43,.18); }
 /* Recent fonts */
 .recent-fonts { display:flex; gap:6px; margin-bottom:16px; flex-wrap:wrap; }
 .recent-font-chip {
-  padding:5px 12px; border:1px solid var(--line); border-radius:100px;
+  display: flex; align-items:center; gap: 6px;
+  padding:5px 8px 5px 12px; border:1px solid var(--line); border-radius:100px;
   background:none; font-size:11px; color:var(--ink2);
   cursor:pointer; font-family:var(--ui-font); letter-spacing:.04em;
-  transition:border-color .15s, color .15s;
+  transition:border-color .15s, color .15s, background .15s;
   -webkit-tap-highlight-color:transparent;
 }
-.recent-font-chip:hover, .recent-font-chip:active { border-color:var(--ink3); color:var(--ink); }
+.recent-font-chip:hover, .recent-font-chip:active { border-color:var(--ink3); color:var(--ink); background: var(--hover); }
+.recent-font-del {
+  display: flex; align-items: center; justify-content: center;
+  width: 18px; height: 18px; border-radius: 50%;
+  color: var(--ink3); transition: color .15s, background .15s;
+}
+.recent-font-del:hover { background: rgba(192,57,43,0.12); color: #C0392B; }
 </style>
 </head>
 <body data-theme="parchment">
@@ -476,22 +641,40 @@ body.dark #del-icon { background: rgba(192,57,43,.18); }
       <div class="sb-sep"></div>
       <span class="sb-item" id="last-modified">—</span>
     </div>
-    <div id="fmt-bar">
-      <button class="fmt-btn" onclick="applyFmt('bold')"          title="太字 ⌘B"  ><b style="font-weight:800">B</b></button>
-      <button class="fmt-btn" onclick="applyFmt('italic')"        title="斜体 ⌘I"  ><i style="font-family:'Shippori Mincho',serif">I</i></button>
-      <button class="fmt-btn" onclick="applyFmt('underline')"     title="下線 ⌘U"   style="text-decoration:underline;text-underline-offset:2px">U</button>
-      <button class="fmt-btn" onclick="applyFmt('strikeThrough')" title="打ち消し"  style="text-decoration:line-through;opacity:.55">S</button>
-      <div class="fmt-sep2"></div>
-      <button class="fmt-btn" onclick="applyBlock('h1')"          title="見出し1"   style="font-weight:700;font-size:10px">H1</button>
-      <button class="fmt-btn" onclick="applyBlock('h2')"          title="見出し2"   style="font-weight:700;font-size:10px">H2</button>
-      <div class="fmt-sep2"></div>
-      <button class="fmt-btn" onclick="applyBlock('blockquote')"  title="引用"      style="font-style:italic;opacity:.55">"</button>
-      <button class="fmt-btn" onclick="applyList()"               title="リスト">·−</button>
-    </div>
+    <div id="fmt-bar"></div>
   </div>
 
   <div id="editor-scroll">
     <div id="editor-inner">
+      <div id="hover-menu-container" onmouseleave="this.classList.remove('expanded')" onmousedown="event.preventDefault()">
+        <div class="hm-inner">
+          <div class="hm-trigger-icon" onclick="const m=document.getElementById('hover-menu-container');m.classList.contains('expanded')?m.classList.remove('expanded'):m.classList.add('expanded')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"/>
+            </svg>
+          </div>
+          <div class="hm-items">
+            <button class="fmt-btn" onclick="applyFmt('bold')" title="太字 ⌘B"><b style="font-weight:800">B</b></button>
+            <button class="fmt-btn" onclick="applyFmt('italic')" title="斜体 ⌘I"><i style="font-family:'Shippori Mincho',serif">I</i></button>
+            <button class="fmt-btn" onclick="applyFmt('underline')" title="下線 ⌘U" style="text-decoration:underline;text-underline-offset:2px">U</button>
+            <button class="fmt-btn" onclick="applyFmt('strikeThrough')" title="打ち消し" style="text-decoration:line-through;opacity:.55">S</button>
+            <div class="fmt-sep2"></div>
+            <button class="fmt-btn" onclick="applyBlock('h1')" title="見出し1" style="font-weight:700;font-size:10px">H1</button>
+            <button class="fmt-btn" onclick="applyBlock('h2')" title="見出し2" style="font-weight:700;font-size:10px">H2</button>
+            <div class="fmt-sep2"></div>
+            <button class="fmt-btn" onclick="applyBlock('blockquote')" title="引用" style="font-style:italic;opacity:.55">"</button>
+            <button class="fmt-btn" onclick="applyList()" title="リスト">·−</button>
+            <button class="fmt-btn" onclick="insertTodo()" title="Todo追加" style="font-size:12px; font-weight:700;">☑</button>
+            <div class="fmt-sep2"></div>
+            <div class="hm-close-icon" onclick="document.getElementById('hover-menu-container').classList.remove('expanded')">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 18 9 12 15 6"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <textarea id="title-input" rows="1" placeholder="題名"></textarea>
       <hr class="editor-divider">
       <div id="content-area" contenteditable="true" spellcheck="false"></div>
@@ -562,6 +745,16 @@ body.dark #del-icon { background: rgba(192,57,43,.18); }
   </div>
 </div>
 
+<!-- Desktop page popover -->
+<div id="page-popover">
+  <span class="nav-popover-title" id="popover-title"></span>
+  <button class="nav-popover-trash" id="popover-trash">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+    </svg>
+  </button>
+</div>
+
 <!-- Modal -->
 <div id="modal-overlay" onclick="overlayClick(event)">
   <div id="modal-scrim"></div>
@@ -574,6 +767,40 @@ body.dark #del-icon { background: rgba(192,57,43,.18); }
 <script>
 const SK_PAGES    = 'fontion_pages_v7';
 const SK_SETTINGS = 'fontion_settings_v7';
+
+let popoverTimer = null;
+window.currentHoverId = null;
+
+window.showPopover = function(el, p) {
+  clearTimeout(popoverTimer);
+  const rect = el.getBoundingClientRect();
+  const popover = document.getElementById('page-popover');
+  popover.style.left = (rect.right + 12) + 'px';
+  popover.style.top = (rect.top + rect.height / 2) + 'px';
+  document.getElementById('popover-title').textContent = p.title || '無題';
+  document.getElementById('popover-title').onclick = () => { if (pendingDeleteId !== p.id) { setActive(p.id); hidePopover(); } };
+  document.getElementById('popover-trash').onclick = (e) => { e.stopPropagation(); hidePopover(); showDeleteConfirm(p.id); };
+  popover.classList.add('show');
+  window.currentHoverId = p.id;
+};
+
+window.startHidePopover = function() {
+  popoverTimer = setTimeout(() => hidePopover(), 150);
+};
+
+window.hidePopover = function() {
+  const popover = document.getElementById('page-popover');
+  if(popover) popover.classList.remove('show');
+  window.currentHoverId = null;
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+  const popover = document.getElementById('page-popover');
+  if(popover) {
+    popover.addEventListener('mouseenter', () => clearTimeout(popoverTimer));
+    popover.addEventListener('mouseleave', () => window.startHidePopover());
+  }
+});
 
 // ── Helpers first (avoid TDZ) ──
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
@@ -645,44 +872,154 @@ function activePage() { return pages.find(p => p.id === activeId) || pages[0]; }
 function renderNav() {
   const c = document.getElementById('nav-pages');
   c.innerHTML = '';
-  pages.forEach(p => {
+  
+  let dragToIdx = null;
+
+  pages.forEach((p, idx) => {
     const wrap = document.createElement('div');
     wrap.className = 'nav-page-wrap';
+    wrap.draggable = true;
+    wrap.dataset.index = idx;
+
+    wrap.addEventListener('dragstart', e => {
+      wrap.classList.add('dragging');
+      e.dataTransfer.setData('text/plain', idx);
+      e.dataTransfer.effectAllowed = 'move';
+      // Hide ghost image on PC
+      const img = new Image();
+      img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+      e.dataTransfer.setDragImage(img, 0, 0);
+    });
+    wrap.addEventListener('dragend', () => {
+      wrap.classList.remove('dragging');
+      c.querySelectorAll('.nav-page-wrap').forEach(el => el.classList.remove('drop-target-above', 'drop-target-below'));
+    });
+    wrap.addEventListener('dragover', e => {
+      e.preventDefault();
+      const rect = wrap.getBoundingClientRect();
+      const relY = e.clientY - rect.top;
+      
+      c.querySelectorAll('.nav-page-wrap').forEach(el => el.classList.remove('drop-target-above', 'drop-target-below'));
+      
+      if (relY < rect.height * 0.5) {
+        wrap.classList.add('drop-target-above');
+        dragToIdx = idx;
+      } else {
+        wrap.classList.add('drop-target-below');
+        dragToIdx = idx + 1;
+      }
+    });
+    wrap.addEventListener('dragleave', () => {
+      wrap.classList.remove('drop-target-above', 'drop-target-below');
+    });
+    wrap.addEventListener('drop', e => {
+      e.preventDefault();
+      const fromIdx = parseInt(e.dataTransfer.getData('text/plain'));
+      if (dragToIdx !== null) {
+        if (fromIdx !== dragToIdx && fromIdx !== dragToIdx - 1) {
+          const finalTo = dragToIdx > fromIdx ? dragToIdx - 1 : dragToIdx;
+          reorderPages(fromIdx, finalTo);
+        }
+      }
+      dragToIdx = null;
+    });
 
     const btn = document.createElement('button');
-    btn.className = 'nav-dot tip-r' + (p.id === activeId ? ' active' : '');
-    btn.dataset.tip = p.title || '無題';
+    btn.className = 'nav-dot' + (p.id === activeId ? ' active' : '');
     btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
       <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
     </svg>`;
     btn.addEventListener('click', () => { if (pendingDeleteId !== p.id) setActive(p.id); });
 
-    const trash = document.createElement('button');
-    trash.className = 'nav-trash';
-    trash.innerHTML = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-    </svg>`;
-    trash.addEventListener('click', e => { e.stopPropagation(); showDeleteConfirm(p.id); });
+    wrap.addEventListener('mouseenter', () => window.showPopover(wrap, p));
+    wrap.addEventListener('mouseleave', () => window.startHidePopover());
 
-    wrap.appendChild(btn); wrap.appendChild(trash); c.appendChild(wrap);
+    wrap.appendChild(btn); c.appendChild(wrap);
   });
+}
+
+function reorderPages(from, to) {
+  const item = pages.splice(from, 1)[0];
+  pages.splice(to, 0, item);
+  saveNow();
+  renderNav();
+  renderMobilePageList();
 }
 
 // Mobile page list
 function renderMobilePageList() {
   const c = document.getElementById('mobile-page-list');
   c.innerHTML = '';
-  pages.forEach(p => {
+  pages.forEach((p, idx) => {
     const item = document.createElement('div');
     item.className = 'mpl-item' + (p.id === activeId ? ' active' : '');
+    item.dataset.index = idx;
+    
     item.innerHTML = `
+      <div class="mpl-drag-handle" style="margin-right:10px; color:var(--ink4); padding: 10px 5px; cursor: grab;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/>
+        </svg>
+      </div>
       <span class="mpl-item-title">${p.title || '無題の思索'}</span>
       <button class="mpl-trash">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
         </svg>
       </button>`;
-    item.addEventListener('click', () => { setActive(p.id); closeMobilePanel(); });
+    
+    item.addEventListener('click', (e) => {
+      if (e.target.closest('.mpl-trash') || e.target.closest('.mpl-drag-handle')) return;
+      setActive(p.id); closeMobilePanel();
+    });
+
+    // Touch-based reordering for mobile
+    const handle = item.querySelector('.mpl-drag-handle');
+    let startY, currentIdx, targetIdx;
+    
+    handle.addEventListener('touchstart', e => {
+      startY = e.touches[0].clientY;
+      currentIdx = idx;
+      item.classList.add('dragging');
+      // Prevent scrolling while dragging
+      document.body.style.overflow = 'hidden';
+    }, {passive:true});
+
+    handle.addEventListener('touchmove', e => {
+      const touchY = e.touches[0].clientY;
+      const overEl = document.elementFromPoint(e.touches[0].clientX, touchY);
+      const targetItem = overEl ? overEl.closest('.mpl-item') : null;
+
+      // Clear all indicators
+      c.querySelectorAll('.mpl-item').forEach(el => {
+        el.classList.remove('drop-target-above', 'drop-target-below');
+      });
+
+      if (targetItem && targetItem !== item) {
+        targetIdx = parseInt(targetItem.dataset.index);
+        const rect = targetItem.getBoundingClientRect();
+        if (touchY < rect.top + rect.height / 2) {
+          targetItem.classList.add('drop-target-above');
+        } else {
+          targetItem.classList.add('drop-target-below');
+          targetIdx += 1;
+        }
+      } else {
+        targetIdx = null;
+      }
+    }, {passive:false});
+
+    handle.addEventListener('touchend', () => {
+      item.classList.remove('dragging');
+      c.querySelectorAll('.mpl-item').forEach(el => el.classList.remove('drop-target-above', 'drop-target-below'));
+      document.body.style.overflow = '';
+      
+      if (targetIdx !== null && targetIdx !== undefined && targetIdx !== idx && targetIdx !== idx + 1) {
+        const finalTo = targetIdx > idx ? targetIdx - 1 : targetIdx;
+        reorderPages(idx, finalTo);
+      }
+    });
+
     item.querySelector('.mpl-trash').addEventListener('click', e => { e.stopPropagation(); showDeleteConfirm(p.id); });
     c.appendChild(item);
   });
@@ -765,8 +1102,12 @@ function deleteOverlayClick(e) {
 document.getElementById('title-input').addEventListener('input', function() {
   activePage().title = this.value;
   autoResizeTitle();
-  const dot = document.querySelector('.nav-dot.active');
-  if (dot) dot.dataset.tip = this.value || '無題';
+  
+  const titleSpan = document.getElementById('popover-title');
+  if (titleSpan && window.currentHoverId === activePage().id) {
+    titleSpan.textContent = this.value || '無題';
+  }
+  
   // live update mobile list item
   const mItem = document.querySelector('.mpl-item.active .mpl-item-title');
   if (mItem) mItem.textContent = this.value || '無題の思索';
@@ -780,9 +1121,109 @@ function autoResizeTitle() {
   el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px';
 }
 
-document.getElementById('content-area').addEventListener('input', function() {
+function applyInlineFmt(node, match, offset, cmd) {
+  const text = node.textContent;
+  let matchIndex = match.index;
+  let innerText = match[1];
+  
+  if (cmd === 'italic') {
+    matchIndex += match.prefix.length;
+    innerText = match.innerText;
+  }
+  
+  const before = text.slice(0, matchIndex);
+  const after = text.slice(offset);
+  
+  node.textContent = before + innerText + after;
+  
+  const r = document.createRange();
+  r.setStart(node, before.length);
+  r.setEnd(node, before.length + innerText.length);
+  const sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(r);
+  
+  document.execCommand(cmd, false, null);
+  
+  sel.collapseToEnd();
+  document.execCommand(cmd, false, null);
+  document.execCommand('insertText', false, '\u200B');
+  
+  activePage().content = document.getElementById('content-area').innerHTML;
+}
+
+document.getElementById('content-area').addEventListener('input', function(e) {
   activePage().content = this.innerHTML;
   updateCharCount(); save();
+
+  const sel = window.getSelection();
+  if (!sel.rangeCount) return;
+  const node = sel.anchorNode;
+  
+  if (node.nodeType === 3) {
+    const text = node.textContent;
+    const offset = sel.anchorOffset;
+    const beforeCursor = text.slice(0, offset);
+    
+    // 1. Block level format
+    let blockCmd = null;
+    if (beforeCursor === '# ') blockCmd = 'h1';
+    else if (beforeCursor === '## ') blockCmd = 'h2';
+    else if (beforeCursor === '> ') blockCmd = 'blockquote';
+    else if (beforeCursor === '- ' || beforeCursor === '* ') blockCmd = 'ul';
+    
+    if (blockCmd) {
+      e.preventDefault();
+      node.textContent = text.slice(offset);
+      const r = document.createRange();
+      r.setStart(node, 0); r.collapse(true);
+      sel.removeAllRanges(); sel.addRange(r);
+      
+      if (blockCmd === 'ul') document.execCommand('insertUnorderedList', false, null);
+      else document.execCommand('formatBlock', false, blockCmd);
+      
+      activePage().content = this.innerHTML;
+      return;
+    }
+    
+    // 2. Format exit marker
+    let parent = node.parentNode;
+    const checkExit = (cmd, tagName, marker) => {
+      if (parent && (parent.tagName === tagName || document.queryCommandState(cmd)) && beforeCursor.endsWith(marker)) {
+        node.textContent = text.slice(0, offset - marker.length) + text.slice(offset);
+        const r = document.createRange();
+        r.setStart(node, offset - marker.length); r.collapse(true);
+        sel.removeAllRanges(); sel.addRange(r);
+        
+        document.execCommand(cmd, false, null);
+        document.execCommand('insertText', false, '\u200B');
+        return true;
+      }
+      return false;
+    };
+    if (checkExit('bold', 'B', '**')) return;
+    if (checkExit('bold', 'STRONG', '**')) return;
+    if (checkExit('italic', 'I', '*')) return;
+    if (checkExit('italic', 'EM', '*')) return;
+    if (checkExit('strikeThrough', 'S', '~~')) return;
+    if (checkExit('strikeThrough', 'STRIKE', '~~')) return;
+    
+    // 3. Inline markup
+    const boldMatch = beforeCursor.match(/\*\*([^\*]+)\*\*$/);
+    if (boldMatch && !document.queryCommandState('bold')) {
+      applyInlineFmt(node, boldMatch, offset, 'bold'); return;
+    }
+    const italicMatch = beforeCursor.match(/(^|[^\*])\*([^\*]+)\*$/);
+    if (italicMatch && !document.queryCommandState('italic')) {
+      const innerText = italicMatch[2];
+      const m = {0: italicMatch[0], index: italicMatch.index, innerText: innerText, prefix: italicMatch[1], 1: italicMatch[1]};
+      applyInlineFmt(node, m, offset, 'italic'); return;
+    }
+    const strikeMatch = beforeCursor.match(/~~([^~]+)~~$/);
+    if (strikeMatch && !document.queryCommandState('strikeThrough')) {
+      applyInlineFmt(node, strikeMatch, offset, 'strikeThrough'); return;
+    }
+  }
 });
 document.getElementById('content-area').addEventListener('keydown', function(e) {
   if (e.key === 'Tab') { e.preventDefault(); document.execCommand('insertText', false, '　'); }
@@ -790,7 +1231,7 @@ document.getElementById('content-area').addEventListener('keydown', function(e) 
 
 function updateCharCount() {
   const text = (activePage().title || '') + (document.getElementById('content-area').innerText || '');
-  document.getElementById('char-count').textContent = `${text.replace(/\s/g,'').length} 字`;
+  document.getElementById('char-count').textContent = `${text.replace(/[\s\u200B]/g,'').length} 字`;
 }
 function renderLastModified() {
   const p = activePage();
@@ -854,35 +1295,171 @@ function updateFmtBar() {
 
   // Inline format checks
   FMT_CHECKS.forEach(({ cmd, query }) => {
-    const btn = document.querySelector(`.fmt-btn[onclick*="${cmd}"]`);
-    if (!btn) return;
-    try {
-      const active = document.queryCommandState(query);
-      btn.classList.toggle('is-active', active);
-    } catch(e) {}
+    document.querySelectorAll(`.fmt-btn[onclick*="${cmd}"]`).forEach(btn => {
+      try {
+        const active = document.queryCommandState(query);
+        btn.classList.toggle('is-active', active);
+      } catch(e) {}
+    });
   });
 
   // Block format checks (H1, H2, blockquote)
   let blockTag = '';
   try { blockTag = document.queryCommandValue('formatBlock').toLowerCase(); } catch(e) {}
   BLOCK_CHECKS.forEach(tag => {
-    const btn = document.querySelector(`.fmt-btn[onclick*="'${tag}'"]`);
-    if (!btn) return;
-    btn.classList.toggle('is-active', blockTag === tag);
+    document.querySelectorAll(`.fmt-btn[onclick*="'${tag}'"]`).forEach(btn => {
+      btn.classList.toggle('is-active', blockTag === tag);
+    });
   });
 
   // List check
-  const listBtn = document.querySelector('.fmt-btn[onclick*="applyList"]');
-  if (listBtn) {
+  document.querySelectorAll('.fmt-btn[onclick*="applyList"]').forEach(listBtn => {
     try {
       listBtn.classList.toggle('is-active', document.queryCommandState('insertUnorderedList'));
     } catch(e) {}
-  }
+  });
 }
 
-// Listen to selection changes to update fmt bar
-document.addEventListener('selectionchange', updateFmtBar);
-document.getElementById('content-area').addEventListener('keyup', updateFmtBar);
+// Listen to selection changes to update fmt bar and hover menu
+document.addEventListener('selectionchange', () => {
+  updateFmtBar();
+  
+  const sel = window.getSelection();
+  const area = document.getElementById('content-area');
+  const menu = document.getElementById('hover-menu-container');
+  const panel = document.getElementById('mobile-page-panel');
+
+  if (!sel.rangeCount || !area.contains(sel.anchorNode) || (panel && panel.classList.contains('open'))) {
+    // We only hide 'show' if 'expanded' is also not present, 
+    // AND if we are sure the focus actually left the editor.
+    if (menu && !menu.classList.contains('expanded')) {
+      menu.classList.remove('show');
+    }
+    return;
+  }
+  
+  if (menu && menu.classList.contains('expanded')) return;
+
+  const range = sel.getRangeAt(0);
+  let rect = range.getBoundingClientRect();
+  const innerRect = document.getElementById('editor-inner').getBoundingClientRect();
+  const areaRect = area.getBoundingClientRect();
+
+  // If editor is empty or at the start of a line, getBoundingClientRect often fails (0,0,0,0)
+  if (rect.top === 0 || (rect.width === 0 && rect.height === 0)) {
+    let el = sel.anchorNode;
+    if (el && el.nodeType === 3) el = el.parentNode;
+    if (el && el !== document.body && area.contains(el)) {
+        rect = el.getBoundingClientRect();
+    }
+  }
+
+  // Final fallback (completely empty editor or outside focus)
+  if (rect.top === 0 || !area.contains(sel.anchorNode)) {
+    rect = {
+      top: areaRect.top,
+      bottom: areaRect.top + 24,
+      left: areaRect.left,
+      right: areaRect.left,
+      height: 24,
+      width: 0
+    };
+  }
+
+  if (menu) {
+    const vpW = window.innerWidth;
+    const isMobile = vpW <= 640;
+    
+    // Improved rect for mobile/collapsed
+    if (sel.isCollapsed && rect.height === 0) {
+      const range = sel.getRangeAt(0).cloneRange();
+      const span = document.createElement('span');
+      span.textContent = '\u200b'; // zero-width space
+      range.insertNode(span);
+      rect = span.getBoundingClientRect();
+      const p = span.parentNode;
+      p.removeChild(span);
+      p.normalize();
+    }
+
+    let topOffset, leftOffset;
+    const editorInner = document.getElementById('editor-inner');
+    const editorRect = editorInner.getBoundingClientRect();
+    const scrollTop = document.getElementById('editor-scroll').scrollTop;
+
+    if (isMobile) {
+      topOffset = rect.bottom - editorRect.top + scrollTop + 8;
+      menu.style.transform = 'none';
+    } else {
+      const verticalOffset = (rect.height > 32) ? 12 : (rect.height / 2);
+      topOffset = rect.top - editorRect.top + scrollTop + verticalOffset;
+      menu.style.transform = 'translateY(-50%)';
+    }
+
+    let leftAnchor = (!sel.isCollapsed && rect.width > 0) ? rect.right : (rect.left || areaRect.left);
+    leftOffset = leftAnchor - editorRect.left + 8;
+    
+    if (isMobile) {
+        if (leftOffset > vpW - 52) leftOffset = vpW - 52;
+        if (leftOffset < 12) leftOffset = 12;
+    } else {
+        if (leftOffset > editorRect.width - 44) leftOffset = editorRect.width - 44;
+        if (leftOffset < 16) leftOffset = 16;
+    }
+    
+    const isExpanded = menu.classList.contains('expanded');
+    const currentTop = parseInt(menu.style.top) || 0;
+    
+    // Auto-collapse if moved to a different line while expanded
+    if (isExpanded && Math.abs(currentTop - topOffset) > 24) {
+      menu.classList.remove('expanded');
+    }
+    
+    menu.style.top = topOffset + 'px';
+    menu.style.left = leftOffset + 'px';
+    menu.classList.add('show');
+  }
+});
+
+document.getElementById('content-area').addEventListener('keyup', e => {
+  updateFmtBar();
+  // Auto markdown conversions (space pressed)
+  if (e.key === ' ' || e.code === 'Space') {
+    const sel = window.getSelection();
+    if (!sel.rangeCount) return;
+    const node = sel.anchorNode;
+    if (node.nodeType === 3) {
+      const text = node.textContent;
+      if (/^[-*]\s$/.test(text) && sel.anchorOffset === 2) {
+        document.execCommand('delete', false);
+        document.execCommand('delete', false);
+        applyList();
+      } else if (/^(\[\]|\[ \])\s$/.test(text) && sel.anchorOffset === text.length) {
+        for(let i=0; i<text.length; i++) document.execCommand('delete', false);
+        insertTodo();
+      }
+    }
+  }
+  
+  if (e.key === 'Enter') {
+    // Re-assign IDs to duplicate todo items that get cloned by hitting enter
+    const seen = new Set();
+    let changed = false;
+    document.querySelectorAll('.todo-wrap').forEach(wrap => {
+      const id = wrap.dataset.id;
+      if (seen.has(id)) {
+        wrap.dataset.id = 'todo_' + Math.random().toString(36).substr(2, 9);
+        wrap.dataset.checked = 'false';
+        delete wrap.dataset.checkedAt;
+        wrap.dataset.reset = 'none';
+        changed = true;
+      } else {
+        seen.add(id);
+      }
+    });
+    if (changed) save();
+  }
+});
 document.getElementById('content-area').addEventListener('mouseup', updateFmtBar);
 
 document.addEventListener('keydown', e => {
@@ -909,7 +1486,12 @@ function openModal(type) {
          <div class="recent-fonts">${
            settings.recentFonts.map(f =>
              `<button class="recent-font-chip" onclick="pickRecentFont('${f.replace(/'/g,"\\'")}')">
-               ${f}
+               <span>${f}</span>
+               <div class="recent-font-del" onclick="removeRecentFont('${f.replace(/'/g,"\\'")}', event)">
+                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                   <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                 </svg>
+               </div>
              </button>`
            ).join('')
          }</div>
@@ -950,6 +1532,34 @@ function openModal(type) {
         <span class="s-label">UIフォント</span>
         <span class="s-value">${settings.uiFont}</span>
       </div>`;
+  } else if (type === 'todo') {
+    const todoEl = document.querySelector(`.todo-wrap[data-id="${currentTodoId}"]`);
+    if (!todoEl) return closeModal();
+    const currentRule = todoEl.dataset.reset || 'none';
+    
+    body.innerHTML = `
+      <div class="modal-section-title">自動リセット設定</div>
+      <div class="settings-row" onclick="setTodoRule('none')">
+        <span class="s-label">なし</span>
+        <span class="s-value">${currentRule === 'none' ? '✓' : ''}</span>
+      </div>
+      <div class="settings-row" onclick="setTodoRule('1h')">
+        <span class="s-label">1時間ごと</span>
+        <span class="s-value">${currentRule === '1h' ? '✓' : ''}</span>
+      </div>
+      <div class="settings-row" onclick="setTodoRule('3h')">
+        <span class="s-label">3時間ごと</span>
+        <span class="s-value">${currentRule === '3h' ? '✓' : ''}</span>
+      </div>
+      <div class="settings-row" onclick="setTodoRule('12h')">
+        <span class="s-label">12時間ごと</span>
+        <span class="s-value">${currentRule === '12h' ? '✓' : ''}</span>
+      </div>
+      <div class="settings-row" onclick="setTodoRule('daily')">
+        <span class="s-label">毎日 0:00</span>
+        <span class="s-value">${currentRule === 'daily' ? '✓' : ''}</span>
+      </div>
+    `;
   }
 
   document.getElementById('modal-overlay').classList.add('open');
@@ -971,6 +1581,64 @@ function setDark(on) {
   });
 }
 
+// ── Todo Logic ──
+window.insertTodo = function() {
+  const id = 'todo_' + Math.random().toString(36).substr(2, 9);
+  const rawHtml = `<span class="todo-wrap" data-id="${id}" data-checked="false" data-reset="none" contenteditable="false"><div class="todo-settings-trigger" onclick="window.openTodoSettings('${id}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></div><div class="todo-check-custom" onclick="toggleTodo(this)"></div></span>`;
+  document.execCommand('insertHTML', false, rawHtml);
+};
+
+window.toggleTodo = function(el) {
+  const wrap = el.closest('.todo-wrap');
+  const isChecked = wrap.dataset.checked === 'true';
+  const newChecked = !isChecked;
+  wrap.dataset.checked = newChecked;
+  if (newChecked) wrap.dataset.checkedAt = Date.now();
+  else delete wrap.dataset.checkedAt;
+  save();
+};
+
+window.openTodoSettings = function(id) {
+  window.currentTodoId = id;
+  openModal('todo');
+};
+
+window.setTodoRule = function(rule) {
+  const todoEl = document.querySelector(`.todo-wrap[data-id="${window.currentTodoId}"]`);
+  if (todoEl) {
+    todoEl.dataset.reset = rule;
+    save();
+  }
+  closeModal();
+};
+
+// Check for resets every minute
+setInterval(() => {
+  let changed = false;
+  const now = Date.now();
+  document.querySelectorAll('.todo-wrap').forEach(wrap => {
+    if (wrap.dataset.checked !== 'true') return;
+    const rule = wrap.dataset.reset;
+    const checkedAt = parseInt(wrap.dataset.checkedAt) || 0;
+    if (rule === 'none' || !checkedAt) return;
+    let shouldReset = false;
+    if (rule === '1h' && now - checkedAt >= 3600000) shouldReset = true;
+    else if (rule === '3h' && now - checkedAt >= 10800000) shouldReset = true;
+    else if (rule === '12h' && now - checkedAt >= 43200000) shouldReset = true;
+    else if (rule === 'daily') {
+      const d1 = new Date(checkedAt).toLocaleDateString();
+      const d2 = new Date(now).toLocaleDateString();
+      if (d1 !== d2) shouldReset = true;
+    }
+    if (shouldReset) {
+      wrap.dataset.checked = 'false';
+      delete wrap.dataset.checkedAt;
+      changed = true;
+    }
+  });
+  if (changed) save();
+}, 60000);
+
 function pickRecentFont(font) {
   document.getElementById('mfi').value = font;
   applyFont();
@@ -979,7 +1647,14 @@ function pickRecentFont(font) {
 function addRecentFont(font) {
   const list = settings.recentFonts.filter(f => f !== font);
   list.unshift(font);
-  settings.recentFonts = list.slice(0, 3);
+  settings.recentFonts = list.slice(0, 6); // Keep up to 6 recent fonts
+}
+
+function removeRecentFont(font, e) {
+  if (e) { e.stopPropagation(); e.preventDefault(); }
+  settings.recentFonts = settings.recentFonts.filter(f => f !== font);
+  save();
+  openModal(modalType); // Refresh modal
 }
 
 function setupFontInput() {
