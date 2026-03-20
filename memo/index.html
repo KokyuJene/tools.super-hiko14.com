@@ -290,7 +290,7 @@ body.dark .nav-popover-trash:hover {
   /* 右側に歯車ボタンが出るスペース確保 */
   .todo-wrap {
     width: 22px; height: 22px;
-    margin: 0 30px 0 2px;
+    margin: 0 8px 0 2px;
     vertical-align: middle;
   }
 }
@@ -870,6 +870,7 @@ let todoLongPressStartY = 0;
 let todoLongPressTargetId = null;
 let suppressTodoToggleId = null;
 let modalOpenedAt = 0;
+let isComposing = false;
 
 // ── Apply theme + dark ──
 function applyTheme() {
@@ -1276,6 +1277,7 @@ document.getElementById('content-area').addEventListener('input', function(e) {
   }
 });
 document.getElementById('content-area').addEventListener('keydown', function(e) {
+  if (isComposing || e.isComposing) return;
   if (e.key === 'Enter') {
     const sel = window.getSelection();
     if (sel && sel.rangeCount && sel.isCollapsed && isTodoNearCaret(sel)) {
@@ -1343,8 +1345,16 @@ function moveCaretAfterTodoWrap(wrap) {
     next.textContent = next.textContent.slice(1);
   }
 
+  let anchorNode = wrap.nextSibling;
+  if (!anchorNode || anchorNode.nodeType !== 3) {
+    anchorNode = document.createTextNode('\u200B');
+    wrap.parentNode.insertBefore(anchorNode, wrap.nextSibling);
+  } else if (!anchorNode.textContent) {
+    anchorNode.textContent = '\u200B';
+  }
+
   const range = document.createRange();
-  range.setStartAfter(wrap);
+  range.setStart(anchorNode, anchorNode.textContent.length);
   range.collapse(true);
   const sel = window.getSelection();
   sel.removeAllRanges();
@@ -1535,6 +1545,7 @@ function updateFmtBar() {
 
 // Listen to selection changes to update fmt bar and hover menu
 document.addEventListener('selectionchange', () => {
+  if (isComposing) return;
   updateFmtBar();
   
   const sel = window.getSelection();
@@ -1651,6 +1662,7 @@ document.addEventListener('selectionchange', () => {
 });
 
 document.getElementById('content-area').addEventListener('keyup', e => {
+  if (isComposing || e.isComposing) return;
   updateFmtBar();
   // Auto markdown conversions (space pressed)
   if (e.key === ' ' || e.code === 'Space') {
@@ -1693,6 +1705,19 @@ document.getElementById('content-area').addEventListener('keyup', e => {
   }
 });
 document.getElementById('content-area').addEventListener('mouseup', updateFmtBar);
+
+document.getElementById('content-area').addEventListener('compositionstart', () => {
+  isComposing = true;
+});
+
+document.getElementById('content-area').addEventListener('compositionend', () => {
+  isComposing = false;
+  const sel = window.getSelection();
+  const area = document.getElementById('content-area');
+  if (sel.rangeCount && area.contains(sel.anchorNode)) {
+    lastEditorRange = sel.getRangeAt(0).cloneRange();
+  }
+});
 
 function clearTodoLongPress() {
   clearTimeout(todoLongPressTimer);
