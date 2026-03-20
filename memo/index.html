@@ -6,7 +6,7 @@
 <title>文綴</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="icon" href="memo_icons.ico">
+<link rel="icon" href="memo_icons.png">
 <link rel="icon" type="image/png" href="memo_icons.png">
 <link rel="apple-touch-icon" sizes="1440×1440" href="memo_icons.png">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;500;700&family=Shippori+Mincho:wght@400;500;700&family=Zen+Kaku+Gothic+New:wght@300;400;500&display=swap" rel="stylesheet">
@@ -258,7 +258,11 @@ body.dark .nav-popover-trash:hover {
   vertical-align: middle; margin: 0 6px 0 2px;
   line-height: 1;
   user-select: none; position: relative;
-  width: 20px; height: 20px;
+  width: 20px; min-width: 20px; max-width: 20px;
+  height: 20px; min-height: 20px; max-height: 20px;
+  flex: 0 0 20px;
+  white-space: nowrap;
+  overflow: hidden;
   -webkit-tap-highlight-color: transparent;
 }
 .todo-check-custom {
@@ -289,7 +293,9 @@ body.dark .nav-popover-trash:hover {
   }
   /* 右側に歯車ボタンが出るスペース確保 */
   .todo-wrap {
-    width: 22px; height: 22px;
+    width: 22px; min-width: 22px; max-width: 22px;
+    height: 22px; min-height: 22px; max-height: 22px;
+    flex: 0 0 22px;
     margin: 0 8px 0 2px;
     vertical-align: middle;
   }
@@ -871,6 +877,60 @@ let todoLongPressTargetId = null;
 let suppressTodoToggleId = null;
 let modalOpenedAt = 0;
 let isComposing = false;
+let isNormalizingTodo = false;
+let selectionSyncRaf = 0;
+let compositionWatchdogTimer = 0;
+
+function clearCompositionWatchdog() {
+  if (!compositionWatchdogTimer) return;
+  clearTimeout(compositionWatchdogTimer);
+  compositionWatchdogTimer = 0;
+}
+
+function armCompositionWatchdog() {
+  clearCompositionWatchdog();
+  compositionWatchdogTimer = setTimeout(() => {
+    if (!isComposing) return;
+    isComposing = false;
+    queueSelectionSync();
+    requestSelectionSync();
+  }, 900);
+}
+
+function restoreEditorSelectionIfNeeded() {
+  const sel = window.getSelection();
+  const area = document.getElementById('content-area');
+  if (!area) return;
+
+  if (sel.rangeCount && area.contains(sel.anchorNode)) return;
+
+  if (lastEditorRange) {
+    sel.removeAllRanges();
+    sel.addRange(lastEditorRange.cloneRange());
+    return;
+  }
+
+  const range = document.createRange();
+  range.selectNodeContents(area);
+  range.collapse(false);
+  sel.removeAllRanges();
+  sel.addRange(range);
+  lastEditorRange = range.cloneRange();
+}
+
+function queueSelectionSync() {
+  if (selectionSyncRaf) cancelAnimationFrame(selectionSyncRaf);
+  selectionSyncRaf = requestAnimationFrame(() => {
+    selectionSyncRaf = 0;
+    restoreEditorSelectionIfNeeded();
+    document.dispatchEvent(new Event('selectionchange'));
+  });
+}
+
+function requestSelectionSync() {
+  const ticks = [0, 24, 80, 180];
+  ticks.forEach(ms => setTimeout(() => queueSelectionSync(), ms));
+}
 
 // ── Apply theme + dark ──
 function applyTheme() {
@@ -1204,8 +1264,35 @@ function applyInlineFmt(node, match, offset, cmd) {
 }
 
 document.getElementById('content-area').addEventListener('input', function(e) {
+  const liveSel = window.getSelection();
+  const liveArea = document.getElementById('content-area');
+  if (liveSel.rangeCount && liveArea.contains(liveSel.anchorNode)) {
+    lastEditorRange = liveSel.getRangeAt(0).cloneRange();
+  }
+
+  // Some IME paths do not emit compositionend reliably.
+  if (isComposing && !e.isComposing) {
+    isComposing = false;
+    clearCompositionWatchdog();
+    queueSelectionSync();
+    requestSelectionSync();
+  }
+
+  if (isComposing || e.isComposing) {
+    armCompositionWatchdog();
+    activePage().content = this.innerHTML;
+    updateCharCount();
+    save();
+    return;
+  }
+
+  if (normalizeTodoWraps()) {
+    activePage().content = this.innerHTML;
+  }
+
   activePage().content = this.innerHTML;
   updateCharCount(); save();
+  queueSelectionSync();
 
   const sel = window.getSelection();
   if (!sel.rangeCount) return;
@@ -1276,6 +1363,20 @@ document.getElementById('content-area').addEventListener('input', function(e) {
     }
   }
 });
+
+document.getElementById('content-area').addEventListener('beforeinput', function(e) {
+  const sel = window.getSelection();
+  if (!sel.rangeCount) return;
+  const wrap = getTodoWrapFromNode(sel.anchorNode);
+  if (!wrap) return;
+
+  moveCaretAfterTodoWrap(wrap);
+
+  // Let the browser handle insertion after caret is relocated.
+  // Preventing default here breaks full-width/composition input on iOS.
+  if (isComposing || e.isComposing || /Composition/i.test(e.inputType || '')) return;
+});
+
 document.getElementById('content-area').addEventListener('keydown', function(e) {
   if (isComposing || e.isComposing) return;
   if (e.key === 'Enter') {
@@ -1364,6 +1465,74 @@ function moveCaretAfterTodoWrap(wrap) {
 
 function isTodoNode(node) {
   return !!(node && node.nodeType === 1 && node.classList && node.classList.contains('todo-wrap'));
+}
+
+function getTodoWrapFromNode(node) {
+  if (!node) return null;
+  let el = node.nodeType === 3 ? node.parentNode : node;
+  if (!el || !el.closest) return null;
+  return el.closest('.todo-wrap');
+}
+
+function normalizeTodoWraps() {
+  if (isNormalizingTodo) return false;
+
+  isNormalizingTodo = true;
+  let changed = false;
+  document.querySelectorAll('.todo-wrap').forEach(wrap => {
+    let leakedText = '';
+    const removeNodes = [];
+
+    wrap.childNodes.forEach(child => {
+      if (child.nodeType === 3) {
+        if ((child.textContent || '').replace(/[\u200B\s]/g, '').length > 0) {
+          leakedText += child.textContent;
+          removeNodes.push(child);
+        }
+      } else if (child.nodeType === 1) {
+        const isKnown = child.classList.contains('todo-settings-trigger') || child.classList.contains('todo-check-custom');
+        if (!isKnown) {
+          leakedText += child.textContent || '';
+          removeNodes.push(child);
+        }
+      }
+    });
+
+    if (removeNodes.length) {
+      removeNodes.forEach(n => n.remove());
+      changed = true;
+    }
+
+    if (leakedText) {
+      const textNode = document.createTextNode(leakedText);
+      wrap.parentNode.insertBefore(textNode, wrap.nextSibling);
+      changed = true;
+    }
+  });
+
+  isNormalizingTodo = false;
+
+  return changed;
+}
+
+function setupTodoNormalizerObserver() {
+  const area = document.getElementById('content-area');
+  if (!area) return;
+
+  const observer = new MutationObserver(() => {
+    if (isNormalizingTodo) return;
+    if (normalizeTodoWraps()) {
+      activePage().content = area.innerHTML;
+      updateCharCount();
+      save();
+    }
+  });
+
+  observer.observe(area, {
+    childList: true,
+    subtree: true,
+    characterData: true
+  });
 }
 
 function isTodoNearCaret(sel) {
@@ -1545,7 +1714,6 @@ function updateFmtBar() {
 
 // Listen to selection changes to update fmt bar and hover menu
 document.addEventListener('selectionchange', () => {
-  if (isComposing) return;
   updateFmtBar();
   
   const sel = window.getSelection();
@@ -1708,15 +1876,32 @@ document.getElementById('content-area').addEventListener('mouseup', updateFmtBar
 
 document.getElementById('content-area').addEventListener('compositionstart', () => {
   isComposing = true;
+  armCompositionWatchdog();
+  queueSelectionSync();
+});
+
+document.getElementById('content-area').addEventListener('compositionupdate', () => {
+  armCompositionWatchdog();
+  queueSelectionSync();
 });
 
 document.getElementById('content-area').addEventListener('compositionend', () => {
   isComposing = false;
+  clearCompositionWatchdog();
   const sel = window.getSelection();
   const area = document.getElementById('content-area');
+  if ((!sel.rangeCount || !area.contains(sel.anchorNode)) && lastEditorRange) {
+    sel.removeAllRanges();
+    sel.addRange(lastEditorRange.cloneRange());
+  }
   if (sel.rangeCount && area.contains(sel.anchorNode)) {
     lastEditorRange = sel.getRangeAt(0).cloneRange();
   }
+
+  // iOS IME may delay selection restoration; retry sync for a short window.
+  updateFmtBar();
+  queueSelectionSync();
+  requestSelectionSync();
 });
 
 function clearTodoLongPress() {
@@ -1990,6 +2175,7 @@ document.body.style.setProperty('--ui-font', `'${settings.uiFont}', sans-serif`)
 injectFont(settings.uiFont);
 renderNav();
 loadActivePage();
+setupTodoNormalizerObserver();
 
 // スマホ: [>]ホバーメニューの外側タップで閉じる
 document.addEventListener('touchstart', function(e) {
