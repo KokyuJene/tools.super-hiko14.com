@@ -255,11 +255,12 @@ body.dark .nav-popover-trash:hover {
   vertical-align: -4px; margin: 0 4px 0 2px;
   user-select: none; position: relative;
   width: 20px; height: 20px;
+  -webkit-tap-highlight-color: transparent;
 }
 .todo-check-custom {
   width: 18px; height: 18px; border: 2px solid var(--ink3);
   border-radius: 6px; cursor: pointer; transition: all .15s;
-  background: transparent; position: relative;
+  background: transparent; position: relative; flex-shrink: 0;
 }
 .todo-wrap[data-checked="true"] .todo-check-custom {
   background: var(--ink); border-color: var(--ink);
@@ -269,17 +270,45 @@ body.dark .nav-popover-trash:hover {
   width: 5px; height: 9px; border: solid white;
   border-width: 0 2px 2px 0; transform: rotate(45deg);
 }
+/* Todo設定ギア：デスクトップは左に浮かせる */
 .todo-settings-trigger {
-  position: absolute; left: -24px; top: 50%; transform: translateY(-50%);
+  position: absolute; left: -26px; top: 50%; transform: translateY(-50%);
   width: 22px; height: 22px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  color: var(--ink3); cursor: pointer; opacity: 0; transition: opacity .15s, background .15s;
+  color: var(--ink3); cursor: pointer; opacity: 0;
+  transition: opacity .15s, background .15s;
+  -webkit-tap-highlight-color: transparent;
 }
 #content-area:focus-within .todo-wrap:hover .todo-settings-trigger {
   opacity: 1;
 }
-.todo-settings-trigger:hover {
+.todo-settings-trigger:hover, .todo-settings-trigger:active {
   background: var(--hover); color: var(--ink);
+}
+/* スマホ：設定ギアはチェックボックスの右横に配置 */
+@media (max-width: 640px) {
+  .todo-settings-trigger {
+    position: absolute; left: auto; right: -26px; top: 50%;
+    transform: translateY(-50%);
+    opacity: 0;
+    transition: opacity .2s;
+  }
+  /* タッチされた直後だけ一時表示（JSで .touched クラスを付与） */
+  .todo-wrap.touched .todo-settings-trigger {
+    opacity: 1;
+  }
+  /* チェックボックス領域を少し大きくしてタップしやすく */
+  .todo-check-custom {
+    width: 22px; height: 22px; border-radius: 7px;
+  }
+  .todo-wrap[data-checked="true"] .todo-check-custom::after {
+    left: 5px; top: 2px; width: 6px; height: 10px;
+  }
+  /* 右側に歯車ボタンが出るスペース確保 */
+  .todo-wrap {
+    width: 22px; height: 22px;
+    margin: 0 32px 0 2px;
+  }
 }
 
 /* ── Editor ── */
@@ -300,17 +329,20 @@ body.dark .nav-popover-trash:hover {
   -webkit-tap-highlight-color: transparent;
 }
 @media (max-width: 640px) {
-  #hover-menu-container { height: 38px; max-width: 38px; border-radius: 19px; }
+  #hover-menu-container {
+    height: 34px; max-width: 34px; border-radius: 17px;
+    /* スマホ：transform を none にするのはJS側で制御 */
+  }
   #hover-menu-container.expanded {
     left: 10px !important; right: 10px !important; 
     max-width: none !important; width: auto !important;
-    height: auto !important; padding: 4px 2px;
-    border-radius: 18px;
+    height: auto !important; min-height: 46px; padding: 8px 4px 6px;
+    border-radius: 18px; overflow: visible;
   }
 }
 
 #hover-menu-container.show { opacity: 1; pointer-events: all; }
-#hover-menu-container.expanded { max-width: 380px; }
+#hover-menu-container.expanded { max-width: 380px; overflow: visible; }
 
 /* Hide menu when mobile panel or modals are open */
 body:has(#mobile-page-panel.open) #hover-menu-container,
@@ -320,7 +352,8 @@ body:has(#modal-overlay.open) #hover-menu-container {
 
 .hm-inner { display: flex; align-items: center; width: max-content; height: 100%; position: relative; }
 @media (max-width: 640px) {
-    #hover-menu-container.expanded .hm-inner { width: 100%; flex-wrap: wrap; justify-content: center; align-content: flex-start; padding-top: 2px; }
+  .hm-inner { width: 100%; }
+  #hover-menu-container.expanded .hm-inner { width: 100%; flex-wrap: wrap; justify-content: center; align-content: flex-start; padding-top: 0; }
 }
 
 .hm-trigger-icon {
@@ -330,10 +363,10 @@ body:has(#modal-overlay.open) #hover-menu-container {
   transition: opacity 0.2s, transform 0.22s cubic-bezier(.4,0,.2,1);
 }
 @media (max-width: 640px) { 
-  .hm-trigger-icon { width: 32px; height: 32px; } 
+  .hm-trigger-icon { width: 34px; height: 34px; } 
   #hover-menu-container.expanded .hm-trigger-icon { 
-    position: absolute; top: 4px; right: 6px; 
-    width: 24px; height: 24px; z-index: 10;
+    position: absolute; top: 6px; right: 4px; 
+    width: 22px; height: 22px; z-index: 10;
   }
 }
 #hover-menu-container.expanded .hm-trigger-icon { transform: rotate(180deg); color: var(--ink4); }
@@ -345,7 +378,11 @@ body:has(#modal-overlay.open) #hover-menu-container {
   transition: opacity 0.18s 0.05s, width 0.25s cubic-bezier(.4,0,.2,1);
 }
 @media (max-width: 640px) {
-  #hover-menu-container.expanded .hm-items { flex-wrap: wrap; justify-content: center; padding: 2px 4px; gap: 4px; width: 100%; overflow: visible; }
+  #hover-menu-container.expanded .hm-items {
+    flex-wrap: wrap; justify-content: center;
+    padding: 4px 28px 4px 4px; gap: 4px;
+    width: 100%; overflow: visible;
+  }
 }
 #hover-menu-container.expanded .hm-items { opacity: 1; width: auto; pointer-events: all; overflow: visible; }
 
@@ -538,7 +575,7 @@ body.dark #del-icon { background: rgba(192,57,43,.18); }
 .del-delete-btn:hover { opacity: .85; }
 
 /* ── Modal ── */
-#modal-overlay { display:none; position:fixed; inset:0; z-index:300; align-items:flex-end; justify-content:center; }
+#modal-overlay { display:none; position:fixed; inset:0; z-index:500; align-items:flex-end; justify-content:center; }
 #modal-overlay.open { display:flex; }
 #modal-scrim { position:absolute; inset:0; background:rgba(30,28,22,.18); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); animation:scrimIn .2s var(--ease); }
 @keyframes scrimIn { from{opacity:0}to{opacity:1} }
@@ -646,7 +683,9 @@ body.dark #del-icon { background: rgba(192,57,43,.18); }
 
   <div id="editor-scroll">
     <div id="editor-inner">
-      <div id="hover-menu-container" onmouseleave="this.classList.remove('expanded')" onmousedown="event.preventDefault()">
+      <div id="hover-menu-container"
+        onmouseleave="if(window.innerWidth>640)this.classList.remove('expanded')"
+        onmousedown="event.preventDefault()">
         <div class="hm-inner">
           <div class="hm-trigger-icon" onclick="const m=document.getElementById('hover-menu-container');m.classList.contains('expanded')?m.classList.remove('expanded'):m.classList.add('expanded')">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -664,7 +703,12 @@ body.dark #del-icon { background: rgba(192,57,43,.18); }
             <div class="fmt-sep2"></div>
             <button class="fmt-btn" onclick="applyBlock('blockquote')" title="引用" style="font-style:italic;opacity:.55">"</button>
             <button class="fmt-btn" onclick="applyList()" title="リスト">·−</button>
-            <button class="fmt-btn" onclick="insertTodo()" title="Todo追加" style="font-size:12px; font-weight:700;">☑</button>
+            <button class="fmt-btn" onclick="insertTodo()" title="Todo追加">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="4" ry="4"/>
+                <path d="M9 12l2 2 4-4"/>
+              </svg>
+            </button>
             <div class="fmt-sep2"></div>
             <div class="hm-close-icon" onclick="document.getElementById('hover-menu-container').classList.remove('expanded')">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -1226,6 +1270,17 @@ document.getElementById('content-area').addEventListener('input', function(e) {
   }
 });
 document.getElementById('content-area').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') {
+    const sel = window.getSelection();
+    if (sel && sel.rangeCount && sel.isCollapsed && isTodoNearCaret(sel)) {
+      e.preventDefault();
+      document.execCommand('insertLineBreak', false, null);
+      activePage().content = document.getElementById('content-area').innerHTML;
+      save();
+      return;
+    }
+  }
+
   if (e.key === 'Tab') { e.preventDefault(); document.execCommand('insertText', false, '　'); }
 });
 
@@ -1269,6 +1324,141 @@ function applyBlock(tag) {
 function applyList() {
   document.getElementById('content-area').focus();
   document.execCommand('insertUnorderedList', false, null);
+  activePage().content = document.getElementById('content-area').innerHTML;
+  save();
+}
+
+function moveCaretAfterTodoWrap(wrap) {
+  if (!wrap || !wrap.parentNode) return;
+
+  // Backward compatibility: remove legacy NBSP placeholder created by older builds.
+  const next = wrap.nextSibling;
+  if (next && next.nodeType === 3 && next.textContent && next.textContent.charAt(0) === '\u00A0') {
+    next.textContent = next.textContent.slice(1);
+  }
+
+  const range = document.createRange();
+  range.setStartAfter(wrap);
+  range.collapse(true);
+  const sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+}
+
+function isTodoNode(node) {
+  return !!(node && node.nodeType === 1 && node.classList && node.classList.contains('todo-wrap'));
+}
+
+function isTodoNearCaret(sel) {
+  const range = sel.getRangeAt(0);
+  const node = range.startContainer;
+  const offset = range.startOffset;
+
+  if (node.nodeType === 3) {
+    if (isTodoNode(node.previousSibling) || isTodoNode(node.nextSibling)) return true;
+    const parent = node.parentNode;
+    if (parent && parent.nodeType === 1) {
+      if (isTodoNode(parent.previousSibling) || isTodoNode(parent.nextSibling)) return true;
+    }
+    return false;
+  }
+
+  if (node.nodeType === 1) {
+    const before = node.childNodes[offset - 1];
+    const after = node.childNodes[offset];
+    if (isTodoNode(before) || isTodoNode(after)) return true;
+  }
+
+  return false;
+}
+
+function hasVisibleContentBeforeInLine(node) {
+  let cur = node;
+  while (cur && cur.id !== 'content-area') {
+    let prev = cur.previousSibling;
+    while (prev) {
+      if (prev.nodeType === 1 && prev.tagName === 'BR') return false;
+
+      const t = (prev.textContent || '').replace(/[\s\u200B]/g, '');
+      if (t.length > 0) return true;
+      prev = prev.previousSibling;
+    }
+
+    const parent = cur.parentNode;
+    if (!parent || parent.id === 'content-area') break;
+    if (parent.nodeType === 1 && /^(DIV|P|LI|BLOCKQUOTE|H1|H2|H3|H4|H5|H6)$/i.test(parent.tagName)) break;
+    cur = parent;
+  }
+  return false;
+}
+
+function hasVisibleText(node) {
+  return !!((node && node.textContent || '').replace(/[\s\u200B]/g, '').length);
+}
+
+function isLineBreakNode(node) {
+  return !!(node && node.nodeType === 1 && node.tagName === 'BR');
+}
+
+function isBlockNode(node) {
+  return !!(node && node.nodeType === 1 && /^(DIV|P|LI|BLOCKQUOTE|H1|H2|H3|H4|H5|H6)$/i.test(node.tagName));
+}
+
+function isCaretAtLineStart(sel) {
+  if (!sel || !sel.rangeCount) return false;
+  const range = sel.getRangeAt(0);
+  const area = document.getElementById('content-area');
+  if (!area.contains(range.startContainer)) return false;
+
+  let node = range.startContainer;
+  const offset = range.startOffset;
+
+  if (node.nodeType === 3) {
+    const before = (node.textContent || '').slice(0, offset).replace(/[\s\u200B]/g, '');
+    if (before.length > 0) return false;
+    let prev = node.previousSibling;
+    while (prev) {
+      if (isLineBreakNode(prev)) return true;
+      if (hasVisibleText(prev)) return false;
+      prev = prev.previousSibling;
+    }
+    node = node.parentNode;
+  } else if (node.nodeType === 1) {
+    for (let i = offset - 1; i >= 0; i--) {
+      const child = node.childNodes[i];
+      if (isLineBreakNode(child)) return true;
+      if (hasVisibleText(child)) return false;
+    }
+  }
+
+  let cur = node;
+  while (cur && cur !== area) {
+    let prev = cur.previousSibling;
+    while (prev) {
+      if (isLineBreakNode(prev)) return true;
+      if (hasVisibleText(prev)) return false;
+      prev = prev.previousSibling;
+    }
+
+    if (isBlockNode(cur)) return true;
+    cur = cur.parentNode;
+  }
+
+  return true;
+}
+
+function insertTodo() {
+  document.getElementById('content-area').focus();
+  const sel = window.getSelection();
+  if (!isCaretAtLineStart(sel)) return;
+
+  const id = 'todo_' + Math.random().toString(36).substr(2, 9);
+  const rawHtml = `<span class="todo-wrap" data-id="${id}" data-checked="false" data-reset="none" contenteditable="false"><span class="todo-settings-trigger" onclick="window.openTodoSettings('${id}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></span><span class="todo-check-custom" onclick="toggleTodo(this)"></span></span>`;
+  document.execCommand('insertHTML', false, rawHtml);
+
+  const inserted = document.querySelector(`.todo-wrap[data-id="${id}"]`);
+  moveCaretAfterTodoWrap(inserted);
+
   activePage().content = document.getElementById('content-area').innerHTML;
   save();
 }
@@ -1328,6 +1518,18 @@ document.addEventListener('selectionchange', () => {
   const area = document.getElementById('content-area');
   const menu = document.getElementById('hover-menu-container');
   const panel = document.getElementById('mobile-page-panel');
+
+  if (sel.rangeCount) {
+    let node = sel.anchorNode;
+    if (node && node.nodeType === 3) node = node.parentNode;
+    if (node && node.closest) {
+      const todoWrap = node.closest('.todo-wrap');
+      if (todoWrap && area.contains(todoWrap)) {
+        moveCaretAfterTodoWrap(todoWrap);
+        return;
+      }
+    }
+  }
 
   if (!sel.rangeCount || !area.contains(sel.anchorNode) || (panel && panel.classList.contains('open'))) {
     // We only hide 'show' if 'expanded' is also not present, 
@@ -1430,12 +1632,15 @@ document.getElementById('content-area').addEventListener('keyup', e => {
     const node = sel.anchorNode;
     if (node.nodeType === 3) {
       const text = node.textContent;
+      const beforeCursor = text.slice(0, sel.anchorOffset);
       if (/^[-*]\s$/.test(text) && sel.anchorOffset === 2) {
         document.execCommand('delete', false);
         document.execCommand('delete', false);
         applyList();
-      } else if (/^(\[\]|\[ \])\s$/.test(text) && sel.anchorOffset === text.length) {
-        for(let i=0; i<text.length; i++) document.execCommand('delete', false);
+      } else if (/^(\[\]|\[ \])\s$/.test(beforeCursor)
+          && !hasVisibleContentBeforeInLine(node)
+          && sel.anchorOffset === beforeCursor.length) {
+        for (let i = 0; i < beforeCursor.length; i++) document.execCommand('delete', false);
         insertTodo();
       }
     }
@@ -1533,7 +1738,7 @@ function openModal(type) {
         <span class="s-value">${settings.uiFont}</span>
       </div>`;
   } else if (type === 'todo') {
-    const todoEl = document.querySelector(`.todo-wrap[data-id="${currentTodoId}"]`);
+    const todoEl = document.querySelector(`.todo-wrap[data-id="${window.currentTodoId}"]`);
     if (!todoEl) return closeModal();
     const currentRule = todoEl.dataset.reset || 'none';
     
@@ -1556,37 +1761,25 @@ function openModal(type) {
         <span class="s-value">${currentRule === '12h' ? '✓' : ''}</span>
       </div>
       <div class="settings-row" onclick="setTodoRule('daily')">
-        <span class="s-label">毎日 0:00</span>
+        <span class="s-label">日ごと</span>
         <span class="s-value">${currentRule === 'daily' ? '✓' : ''}</span>
-      </div>
-    `;
+      </div>`;
   }
 
   document.getElementById('modal-overlay').classList.add('open');
 }
 
-function pickTheme(id) {
-  settings.theme = id;
-  applyTheme(); save();
-  document.querySelectorAll('.theme-swatch-btn').forEach(b => {
-    b.classList.toggle('active', b.getAttribute('onclick').includes(`'${id}'`));
-  });
-}
-
-function setDark(on) {
-  settings.dark = on;
-  applyTheme(); save();
-  document.querySelectorAll('.dark-toggle-btn').forEach((b, i) => {
-    b.classList.toggle('active', on ? i === 1 : i === 0);
-  });
-}
-
-// ── Todo Logic ──
-window.insertTodo = function() {
-  const id = 'todo_' + Math.random().toString(36).substr(2, 9);
-  const rawHtml = `<span class="todo-wrap" data-id="${id}" data-checked="false" data-reset="none" contenteditable="false"><div class="todo-settings-trigger" onclick="window.openTodoSettings('${id}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></div><div class="todo-check-custom" onclick="toggleTodo(this)"></div></span>`;
-  document.execCommand('insertHTML', false, rawHtml);
-};
+// スマホ向け: Todoをタッチしたとき歯車アイコンを一時表示
+let todoTouchTimer = null;
+document.getElementById('content-area').addEventListener('touchstart', function(e) {
+  const wrap = e.target.closest('.todo-wrap');
+  if (!wrap) return;
+  // 既存のtouchedを全解除
+  document.querySelectorAll('.todo-wrap.touched').forEach(w => w.classList.remove('touched'));
+  clearTimeout(todoTouchTimer);
+  wrap.classList.add('touched');
+  todoTouchTimer = setTimeout(() => wrap.classList.remove('touched'), 2500);
+}, { passive: true });
 
 window.toggleTodo = function(el) {
   const wrap = el.closest('.todo-wrap');
@@ -1701,6 +1894,15 @@ document.body.style.setProperty('--ui-font', `'${settings.uiFont}', sans-serif`)
 injectFont(settings.uiFont);
 renderNav();
 loadActivePage();
+
+// スマホ: [>]ホバーメニューの外側タップで閉じる
+document.addEventListener('touchstart', function(e) {
+  const menu = document.getElementById('hover-menu-container');
+  if (!menu || !menu.classList.contains('expanded')) return;
+  if (!menu.contains(e.target)) {
+    menu.classList.remove('expanded');
+  }
+}, { passive: true });
 </script>
 </body>
 </html>
