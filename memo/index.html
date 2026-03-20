@@ -6,6 +6,9 @@
 <title>文綴</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="icon" href="memo_icons.ico">
+<link rel="icon" type="image/png" href="memo_icons.png">
+<link rel="apple-touch-icon" sizes="1440×1440" href="memo_icons.png">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;500;700&family=Shippori+Mincho:wght@400;500;700&family=Zen+Kaku+Gothic+New:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -252,7 +255,8 @@ body.dark .nav-popover-trash:hover {
 /* Todo elements */
 .todo-wrap {
   display: inline-flex; align-items: center; justify-content: center;
-  vertical-align: -4px; margin: 0 4px 0 2px;
+  vertical-align: middle; margin: 0 6px 0 2px;
+  line-height: 1;
   user-select: none; position: relative;
   width: 20px; height: 20px;
   -webkit-tap-highlight-color: transparent;
@@ -272,31 +276,10 @@ body.dark .nav-popover-trash:hover {
 }
 /* Todo設定ギア：デスクトップは左に浮かせる */
 .todo-settings-trigger {
-  position: absolute; left: -26px; top: 50%; transform: translateY(-50%);
-  width: 22px; height: 22px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  color: var(--ink3); cursor: pointer; opacity: 0;
-  transition: opacity .15s, background .15s;
-  -webkit-tap-highlight-color: transparent;
+  display: none !important;
 }
-#content-area:focus-within .todo-wrap:hover .todo-settings-trigger {
-  opacity: 1;
-}
-.todo-settings-trigger:hover, .todo-settings-trigger:active {
-  background: var(--hover); color: var(--ink);
-}
-/* スマホ：設定ギアはチェックボックスの右横に配置 */
+/* スマホ：設定ギアは非表示（長押しで設定を開く） */
 @media (max-width: 640px) {
-  .todo-settings-trigger {
-    position: absolute; left: auto; right: -26px; top: 50%;
-    transform: translateY(-50%);
-    opacity: 0;
-    transition: opacity .2s;
-  }
-  /* タッチされた直後だけ一時表示（JSで .touched クラスを付与） */
-  .todo-wrap.touched .todo-settings-trigger {
-    opacity: 1;
-  }
   /* チェックボックス領域を少し大きくしてタップしやすく */
   .todo-check-custom {
     width: 22px; height: 22px; border-radius: 7px;
@@ -307,7 +290,8 @@ body.dark .nav-popover-trash:hover {
   /* 右側に歯車ボタンが出るスペース確保 */
   .todo-wrap {
     width: 22px; height: 22px;
-    margin: 0 32px 0 2px;
+    margin: 0 30px 0 2px;
+    vertical-align: middle;
   }
 }
 
@@ -659,7 +643,7 @@ body.dark #del-icon { background: rgba(192,57,43,.18); }
     </svg>
   </button>
   <div id="nav-bottom">
-    <button class="nav-icon-btn tip-r" onclick="openModal('settings')" data-tip="環境設定">
+    <button class="nav-icon-btn tip-r" onclick="openSettingsModal(event)" data-tip="環境設定">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="12" cy="12" r="3"/>
         <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
@@ -748,7 +732,7 @@ body.dark #del-icon { background: rgba(192,57,43,.18); }
     </svg>
     <span>編集</span>
   </button>
-  <button class="mb-btn" onclick="openModal('settings')">
+  <button class="mb-btn" onclick="openSettingsModal(event)">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
       <circle cx="12" cy="12" r="3"/>
       <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
@@ -879,6 +863,13 @@ let modalType = null;
 let pendingDeleteId = null;
 let mobilePanelOpen = false;
 let saveTimer, flashTimer, deleteTimer;
+let lastEditorRange = null;
+let todoLongPressTimer = null;
+let todoLongPressStartX = 0;
+let todoLongPressStartY = 0;
+let todoLongPressTargetId = null;
+let suppressTodoToggleId = null;
+let modalOpenedAt = 0;
 
 // ── Apply theme + dark ──
 function applyTheme() {
@@ -889,6 +880,21 @@ function applyTheme() {
 function toggleDark() {
   settings.dark = !settings.dark;
   applyTheme(); save();
+}
+
+function pickTheme(themeId) {
+  if (!THEMES.some(t => t.id === themeId)) return;
+  settings.theme = themeId;
+  applyTheme();
+  save();
+  if (modalType === 'settings') openModal('settings');
+}
+
+function setDark(isDark) {
+  settings.dark = !!isDark;
+  applyTheme();
+  save();
+  if (modalType === 'settings') openModal('settings');
 }
 
 // ── Persistence ──
@@ -1343,6 +1349,7 @@ function moveCaretAfterTodoWrap(wrap) {
   const sel = window.getSelection();
   sel.removeAllRanges();
   sel.addRange(range);
+  lastEditorRange = range.cloneRange();
 }
 
 function isTodoNode(node) {
@@ -1419,28 +1426,37 @@ function isCaretAtLineStart(sel) {
     let prev = node.previousSibling;
     while (prev) {
       if (isLineBreakNode(prev)) return true;
+      if (isBlockNode(prev)) return true;
       if (hasVisibleText(prev)) return false;
       prev = prev.previousSibling;
     }
     node = node.parentNode;
   } else if (node.nodeType === 1) {
+    const atNodeStart = offset === 0;
+    if (atNodeStart && isBlockNode(node)) return true;
+
+    const childAtCaret = node.childNodes[offset];
+    if (childAtCaret && isBlockNode(childAtCaret)) return true;
+
     for (let i = offset - 1; i >= 0; i--) {
       const child = node.childNodes[i];
       if (isLineBreakNode(child)) return true;
+      if (isBlockNode(child)) return true;
       if (hasVisibleText(child)) return false;
     }
   }
 
   let cur = node;
   while (cur && cur !== area) {
+    if (isBlockNode(cur)) return true;
+
     let prev = cur.previousSibling;
     while (prev) {
       if (isLineBreakNode(prev)) return true;
+      if (isBlockNode(prev)) return true;
       if (hasVisibleText(prev)) return false;
       prev = prev.previousSibling;
     }
-
-    if (isBlockNode(cur)) return true;
     cur = cur.parentNode;
   }
 
@@ -1448,8 +1464,15 @@ function isCaretAtLineStart(sel) {
 }
 
 function insertTodo() {
-  document.getElementById('content-area').focus();
+  const area = document.getElementById('content-area');
+  area.focus();
   const sel = window.getSelection();
+  if ((!sel.rangeCount || !area.contains(sel.anchorNode)) && lastEditorRange) {
+    sel.removeAllRanges();
+    sel.addRange(lastEditorRange.cloneRange());
+  }
+
+  if (!sel.rangeCount || !area.contains(sel.anchorNode)) return;
   if (!isCaretAtLineStart(sel)) return;
 
   const id = 'todo_' + Math.random().toString(36).substr(2, 9);
@@ -1518,6 +1541,10 @@ document.addEventListener('selectionchange', () => {
   const area = document.getElementById('content-area');
   const menu = document.getElementById('hover-menu-container');
   const panel = document.getElementById('mobile-page-panel');
+
+  if (sel.rangeCount && area.contains(sel.anchorNode)) {
+    lastEditorRange = sel.getRangeAt(0).cloneRange();
+  }
 
   if (sel.rangeCount) {
     let node = sel.anchorNode;
@@ -1667,6 +1694,45 @@ document.getElementById('content-area').addEventListener('keyup', e => {
 });
 document.getElementById('content-area').addEventListener('mouseup', updateFmtBar);
 
+function clearTodoLongPress() {
+  clearTimeout(todoLongPressTimer);
+  todoLongPressTimer = null;
+  todoLongPressTargetId = null;
+}
+
+const LONG_PRESS_MS = 500;
+const LONG_PRESS_MOVE_TOLERANCE = 8;
+
+document.getElementById('content-area').addEventListener('pointerdown', function(e) {
+  const wrap = e.target.closest('.todo-wrap');
+  if (!wrap) return;
+
+  clearTodoLongPress();
+  todoLongPressTargetId = wrap.dataset.id;
+  todoLongPressStartX = e.clientX;
+  todoLongPressStartY = e.clientY;
+
+  todoLongPressTimer = setTimeout(() => {
+    const id = todoLongPressTargetId;
+    clearTodoLongPress();
+    if (!id) return;
+    suppressTodoToggleId = id;
+    window.openTodoSettings(id);
+  }, LONG_PRESS_MS);
+});
+
+document.getElementById('content-area').addEventListener('pointermove', function(e) {
+  if (!todoLongPressTimer) return;
+  if (Math.abs(e.clientX - todoLongPressStartX) > LONG_PRESS_MOVE_TOLERANCE ||
+      Math.abs(e.clientY - todoLongPressStartY) > LONG_PRESS_MOVE_TOLERANCE) {
+    clearTodoLongPress();
+  }
+});
+
+document.getElementById('content-area').addEventListener('pointerup', clearTodoLongPress);
+document.getElementById('content-area').addEventListener('pointercancel', clearTodoLongPress);
+document.getElementById('content-area').addEventListener('pointerleave', clearTodoLongPress);
+
 document.addEventListener('keydown', e => {
   const mod = e.metaKey || e.ctrlKey;
   if (mod && e.key === 'b') { e.preventDefault(); applyFmt('bold'); }
@@ -1767,22 +1833,26 @@ function openModal(type) {
   }
 
   document.getElementById('modal-overlay').classList.add('open');
+  modalOpenedAt = Date.now();
+}
+
+function openSettingsModal(e) {
+  if (e) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+  openModal('settings');
 }
 
 // スマホ向け: Todoをタッチしたとき歯車アイコンを一時表示
-let todoTouchTimer = null;
-document.getElementById('content-area').addEventListener('touchstart', function(e) {
-  const wrap = e.target.closest('.todo-wrap');
-  if (!wrap) return;
-  // 既存のtouchedを全解除
-  document.querySelectorAll('.todo-wrap.touched').forEach(w => w.classList.remove('touched'));
-  clearTimeout(todoTouchTimer);
-  wrap.classList.add('touched');
-  todoTouchTimer = setTimeout(() => wrap.classList.remove('touched'), 2500);
-}, { passive: true });
+// Todo設定は長押しで開く（ギアアイコンは非表示）
 
 window.toggleTodo = function(el) {
   const wrap = el.closest('.todo-wrap');
+  if (suppressTodoToggleId && wrap.dataset.id === suppressTodoToggleId) {
+    suppressTodoToggleId = null;
+    return;
+  }
   const isChecked = wrap.dataset.checked === 'true';
   const newChecked = !isChecked;
   wrap.dataset.checked = newChecked;
@@ -1864,6 +1934,7 @@ function closeModal() {
   modalType = null;
 }
 function overlayClick(e) {
+  if (Date.now() - modalOpenedAt < 180) return;
   if (e.target === document.getElementById('modal-scrim') ||
       e.target === document.getElementById('modal-overlay')) closeModal();
 }
