@@ -3,181 +3,279 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ポリゴンアートジェネレーター</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Polygon Art</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Noto+Sans+JP:wght@300;400&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
-        
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg: #f7f5f2;
+            --surface: #ffffff;
+            --border: #e8e3dc;
+            --text-primary: #2a2520;
+            --text-secondary: #9c9189;
+            --text-muted: #c4bdb5;
+            --accent: #b09a82;
+            --accent-light: #d4c4b0;
+            --success: #8aad96;
+            --error: #c4847a;
+        }
+
         body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Noto Sans JP', sans-serif;
+            font-weight: 300;
+            background: var(--bg);
             min-height: 100vh;
-            padding: 2rem;
+            color: var(--text-primary);
+            padding: 3rem 1.5rem 5rem;
         }
-        
-        .glass {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: fadeUp 0.8s ease both;
         }
-        
-        #artCanvas {
-            transition: all 0.3s ease;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+
+        header h1 {
+            font-family: 'Cormorant Garamond', serif;
+            font-weight: 300;
+            font-size: clamp(2rem, 5vw, 3rem);
+            letter-spacing: 0.12em;
+            color: var(--text-primary);
+            line-height: 1.1;
         }
-        
-        input[type="range"] {
-            -webkit-appearance: none;
-            appearance: none;
-            background: transparent;
+
+        header h1 em {
+            font-style: italic;
+            color: var(--accent);
         }
-        
-        input[type="range"]::-webkit-slider-track {
-            background: #e5e7eb;
-            height: 6px;
-            border-radius: 3px;
+
+        header p {
+            margin-top: 0.6rem;
+            font-size: 0.72rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--text-muted);
         }
-        
+
+        .card {
+            max-width: 760px;
+            margin: 0 auto;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 2px;
+            padding: 2.5rem 2.5rem 2rem;
+            animation: fadeUp 0.8s 0.1s ease both;
+        }
+
+        .form-group { margin-bottom: 2rem; }
+
+        .form-label {
+            display: block;
+            font-size: 0.68rem;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            margin-bottom: 0.75rem;
+        }
+
+        .upload-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 1px dashed var(--border);
+            border-radius: 1px;
+            padding: 2.2rem;
+            cursor: pointer;
+            transition: border-color 0.2s, background 0.2s;
+            gap: 0.5rem;
+        }
+
+        .upload-area:hover { border-color: var(--accent-light); background: #faf8f5; }
+
+        .upload-area svg {
+            width: 28px;
+            height: 28px;
+            stroke: var(--text-muted);
+            transition: stroke 0.2s;
+        }
+
+        .upload-area:hover svg { stroke: var(--accent); }
+
+        .upload-area span {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            letter-spacing: 0.05em;
+        }
+
+        .slider-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 0.6rem;
+        }
+
+        .slider-value {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.5rem;
+            font-weight: 300;
+            color: var(--accent);
+            line-height: 1;
+        }
+
+        input[type="range"] { -webkit-appearance: none; appearance: none; width: 100%; background: transparent; }
+        input[type="range"]::-webkit-slider-track { height: 1px; background: var(--border); border-radius: 0; }
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
-            appearance: none;
-            width: 20px;
-            height: 20px;
+            width: 14px; height: 14px;
             border-radius: 50%;
-            background: #667eea;
+            background: var(--surface);
+            border: 1.5px solid var(--accent);
             cursor: pointer;
-            margin-top: -7px;
+            margin-top: -6.5px;
+            transition: background 0.2s, transform 0.15s;
+        }
+        input[type="range"]::-webkit-slider-thumb:hover { background: var(--accent-light); transform: scale(1.15); }
+
+        .slider-hints {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 0.5rem;
+            font-size: 0.65rem;
+            letter-spacing: 0.12em;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            border: none;
+            border-bottom: 1px solid var(--border);
+            background: transparent;
+            padding: 0.5rem 0;
+            font-family: 'Noto Sans JP', sans-serif;
+            font-weight: 300;
+            font-size: 0.85rem;
+            color: var(--text-primary);
+            letter-spacing: 0.04em;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        input[type="text"]:focus { border-color: var(--accent); }
+        input[type="text"]::placeholder { color: var(--text-muted); }
+
+        .divider { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+
+        .btn-row { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+
+        .btn {
+            flex: 1;
+            min-width: 100px;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            background: transparent;
+            font-family: 'Noto Sans JP', sans-serif;
+            font-weight: 300;
+            font-size: 0.68rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-radius: 1px;
             transition: all 0.2s;
         }
-        
-        input[type="range"]::-webkit-slider-thumb:hover {
-            transform: scale(1.2);
-            background: #764ba2;
+
+        .btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); background: #faf8f5; }
+        .btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+        .btn-generate { border-color: var(--text-primary); color: var(--text-primary); }
+        .btn-generate:hover:not(:disabled) { background: var(--text-primary); color: var(--surface); }
+
+        .canvas-wrapper { margin-top: 2rem; border: 1px solid var(--border); overflow: hidden; background: var(--bg); }
+        #artCanvas { display: block; width: 100%; height: auto; }
+
+        #messageBox {
+            margin-top: 1.2rem;
+            font-size: 0.72rem;
+            letter-spacing: 0.1em;
+            text-align: center;
+            padding: 0.7rem 1rem;
+            border-radius: 1px;
+            display: none;
         }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            transition: all 0.3s ease;
-        }
-        
-        .btn-primary:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        #messageBox.success { background: #f0f6f2; color: var(--success); }
+        #messageBox.error   { background: #fdf3f2; color: var(--error); }
+
+        footer {
+            text-align: center;
+            margin-top: 2.5rem;
+            font-size: 0.62rem;
+            letter-spacing: 0.18em;
+            color: var(--text-muted);
+            text-transform: uppercase;
         }
 
-        /* ダウンロードボタンのスタイル */
-        .btn-download-png {
-            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-            transition: all 0.3s ease;
-        }
-        
-        .btn-download-png:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(17, 153, 142, 0.3);
-        }
-
-        .btn-download-webp {
-            background: linear-gradient(135deg, #f7971e 0%, #ffd200 100%); /* Orange/Yellow */
-            transition: all 0.3s ease;
-        }
-        
-        .btn-download-webp:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(247, 151, 30, 0.3);
-        }
-
-        .btn-download-jpg {
-            background: linear-gradient(135deg, #ed213a 0%, #93291e 100%); /* Red/Maroon */
-            transition: all 0.3s ease;
-        }
-        
-        .btn-download-jpg:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(237, 33, 58, 0.3);
-        }
-
-        .komejirusi{
-    opacity: 0;
-        }
-
-                .komejirusi:hover{
-    font-size: 90%;
-    color: #eeeeee;
-    opacity: 1;
-    text-align: center;
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(12px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
 <body>
 
-<div class="max-w-4xl mx-auto">
-    <div class="text-center mb-8">
-        <h1 class="text-5xl font-light text-white mb-2">ポリゴンアートジェネレーター</h1>
-        <p class="text-white text-opacity-80 text-sm">画像を美しいポリゴンに変換しましょう</p>
+<header>
+    <h1>Polygon <em>Art</em></h1>
+    <p>画像をポリゴンに変換する</p>
+</header>
+
+<div class="card">
+
+    <div class="form-group">
+        <label class="form-label">Image</label>
+        <label for="imageUpload" class="upload-area">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+            </svg>
+            <span>クリックまたはドラッグ＆ドロップ</span>
+            <input type="file" id="imageUpload" accept="image/*" style="display:none" />
+        </label>
     </div>
 
-    <div class="glass rounded-3xl p-8 shadow-2xl">
-        
-        <div class="space-y-6 mb-8">
-            
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-3">画像をアップロード</label>
-                <label for="imageUpload" class="flex items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-2xl cursor-pointer hover:border-purple-400 transition-all group">
-                    <div class="text-center">
-                        <svg class="mx-auto h-12 w-12 text-gray-400 group-hover:text-purple-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                        </svg>
-                        <p class="mt-2 text-sm text-gray-500">クリックしてアップロード、またはドラッグ＆ドロップ</p>
-                    </div>
-                    <input type="file" id="imageUpload" accept="image/*" class="hidden" />
-                </label>
-            </div>
-
-            <div>
-                <div class="flex justify-between items-center mb-3">
-                    <label class="text-sm font-medium text-gray-700">ポリゴン密度</label>
-                    <span id="pointCountDisplay" class="text-2xl font-semibold text-purple-600">500</span>
-                </div>
-                <input type="range" id="pointCount" min="100" max="2000" value="500" step="50" class="w-full" />
-                <div class="flex justify-between text-xs text-gray-400 mt-1">
-                    <span>粗い</span>
-                    <span>詳細</span>
-                </div>
-            </div>
-
-            <div class="flex gap-4 mb-6">
-                <button id="generateButton" class="flex-1 btn-primary text-white font-medium py-4 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-                    アートを生成
-                </button>
-            </div>
-            
-            <div class="mb-4">
-                <label for="fileNameInput" class="block text-sm font-medium text-gray-700 mb-2">ファイル名を設定 (例: My_Polygon_Art)</label>
-                <input type="text" id="fileNameInput" placeholder="Polygon(デフォルト)" class="w-full p-3 border border-gray-300 rounded-xl focus:ring-purple-500 focus:border-purple-500" />
-            </div>
-
-            <div class="grid grid-cols-3 gap-4">
-                <button id="downloadPngButton" class="btn-download-png text-white font-medium py-4 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-                    Download PNG
-                </button>
-                <button id="downloadWebpButton" class="btn-download-webp text-white font-medium py-4 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-                    Download WEBP
-                </button>
-                <button id="downloadJpgButton" class="btn-download-jpg text-white font-medium py-4 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-                    Download JPG
-                </button>
-            </div>
+    <div class="form-group">
+        <div class="slider-row">
+            <label class="form-label" style="margin-bottom:0">Density</label>
+            <span class="slider-value" id="pointCountDisplay">500</span>
         </div>
-
-        <div class="rounded-2xl overflow-hidden bg-gray-50">
-            <canvas id="artCanvas" width="800" height="450" class="w-full h-auto"></canvas>
-        </div>
-
-        <div id="messageBox" class="mt-6 p-4 rounded-xl text-center hidden"></div>
+        <input type="range" id="pointCount" min="100" max="2000" value="500" step="50" />
+        <div class="slider-hints"><span>粗い</span><span>細密</span></div>
     </div>
 
-    <div class="komejirusi"><p>© 高級ジェネ™ All rights reserved.</p></div>
+    <button id="generateButton" class="btn btn-generate" style="width:100%" disabled>Generate</button>
+
+    <hr class="divider">
+
+    <div class="form-group">
+        <label class="form-label" for="fileNameInput">Filename</label>
+        <input type="text" id="fileNameInput" placeholder="Polygon(省略可)" />
+    </div>
+
+    <span class="form-label">Download</span>
+    <div class="btn-row">
+        <button id="downloadPngButton"  class="btn" disabled>PNG</button>
+        <button id="downloadWebpButton" class="btn" disabled>WebP</button>
+        <button id="downloadJpgButton"  class="btn" disabled>JPG</button>
+    </div>
+
+    <div class="canvas-wrapper">
+        <canvas id="artCanvas" width="800" height="450"></canvas>
+    </div>
+
+    <div id="messageBox"></div>
 </div>
+
+<footer>© 高級ジェネ™</footer>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -186,26 +284,24 @@
 
     setLogLevel('error');
 
-    // ローカル環境でのエラーを防ぐためのチェックと変数定義
     const isLocalEnvironment = typeof __app_id === 'undefined';
-
     const appId = isLocalEnvironment ? 'default-app-id' : __app_id;
     const firebaseConfig = isLocalEnvironment ? {} : JSON.parse(__firebase_config);
     const initialAuthToken = isLocalEnvironment ? null : __initial_auth_token;
 
     let app, db, auth, currentImage = null;
 
-    const canvas = document.getElementById('artCanvas');
-    const ctx = canvas.getContext('2d', { willReadFrequently: true });
-    const imageUpload = document.getElementById('imageUpload');
-    const pointCountInput = document.getElementById('pointCount');
+    const canvas            = document.getElementById('artCanvas');
+    const ctx               = canvas.getContext('2d', { willReadFrequently: true });
+    const imageUpload       = document.getElementById('imageUpload');
+    const pointCountInput   = document.getElementById('pointCount');
     const pointCountDisplay = document.getElementById('pointCountDisplay');
-    const generateButton = document.getElementById('generateButton');
+    const generateButton    = document.getElementById('generateButton');
     const downloadPngButton = document.getElementById('downloadPngButton');
-    const downloadWebpButton = document.getElementById('downloadWebpButton');
+    const downloadWebpButton= document.getElementById('downloadWebpButton');
     const downloadJpgButton = document.getElementById('downloadJpgButton');
-    const fileNameInput = document.getElementById('fileNameInput'); // 新しい要素を取得
-    const messageBox = document.getElementById('messageBox');
+    const fileNameInput     = document.getElementById('fileNameInput');
+    const messageBox        = document.getElementById('messageBox');
 
     function loadPlaceholderImage() {
         const img = new Image();
@@ -217,87 +313,49 @@
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
             generateButton.disabled = false;
         };
-        img.onerror = () => {
-            showMessage('プレースホルダーの読み込みに失敗しました。画像をアップロードしてください。', 'error');
-        };
+        img.onerror = () => showMessage('プレースホルダーの読み込みに失敗しました。', 'error');
         img.src = "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=450&fit=crop";
     }
 
     async function initializeFirebase() {
         try {
-            if (Object.keys(firebaseConfig).length === 0) {
-                console.warn("Firebase config not found. Skipping Firebase initialization.");
-                return; 
-            }
-            
-            app = initializeApp(firebaseConfig);
+            if (Object.keys(firebaseConfig).length === 0) return;
+            app  = initializeApp(firebaseConfig);
             auth = getAuth(app);
-            db = getFirestore(app);
-            if (initialAuthToken) {
-                await signInWithCustomToken(auth, initialAuthToken);
-            } else {
-                await signInAnonymously(auth);
-            }
-        } catch (error) {
-            console.error("Firebase error:", error);
-            showMessage('Firebaseの初期化に失敗しました。', 'error');
-        }
+            db   = getFirestore(app);
+            if (initialAuthToken) await signInWithCustomToken(auth, initialAuthToken);
+            else await signInAnonymously(auth);
+        } catch (e) { console.error("Firebase error:", e); }
     }
 
     function showMessage(msg, type = 'info') {
         messageBox.textContent = msg;
-        messageBox.classList.remove('hidden', 'bg-blue-100', 'text-blue-800', 'bg-red-100', 'text-red-800', 'bg-green-100', 'text-green-800');
-        
-        if (type === 'error') {
-            messageBox.classList.add('bg-red-100', 'text-red-800');
-        } else if (type === 'success') {
-            messageBox.classList.add('bg-green-100', 'text-green-800');
-        } else {
-            messageBox.classList.add('bg-blue-100', 'text-blue-800');
-        }
-        
-        messageBox.classList.remove('hidden');
-        setTimeout(() => messageBox.classList.add('hidden'), 4000);
+        messageBox.className = type;
+        messageBox.style.display = 'block';
+        setTimeout(() => { messageBox.style.display = 'none'; }, 4000);
     }
 
-    /**
-     * @param {string} mimeType - 'image/png', 'image/jpeg', or 'image/webp'
-     * @param {string} extension - 'png', 'jpg', or 'webp'
-     * @param {number} [quality=1.0] - JPEG/WEBPの品質 (0.0 - 1.0)
-     */
     function downloadArt(mimeType, extension, quality = 1.0) {
-        // ファイル名を取得し、安全な形式に変換
-        let baseName = fileNameInput.value.trim();
-        if (baseName) {
-            // ファイル名に使用できない文字をアンダースコアに置換
-            baseName = baseName.replace(/[^a-zA-Z0-9_あ-ん\-]/g, '_'); 
-        } else {
-            // ファイル名が空の場合はデフォルト名を使用
-            baseName = 'Polygon';
-        }
-
-        // PNGは品質指定を無視、JPEG/WEBPは品質を指定
+        let baseName = fileNameInput.value.trim().replace(/[^a-zA-Z0-9_\-あ-ん]/g, '_') || 'Polygon';
         const dataURL = canvas.toDataURL(mimeType, quality);
         const a = document.createElement('a');
         a.href = dataURL;
-        // 最終的なファイル名
-        a.download = `${baseName}.${extension}`; 
+        a.download = `${baseName}.${extension}`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
-        showMessage(`${extension.toUpperCase()}形式でダウンロードしました。ファイル名: ${baseName}.${extension}`, 'success');
+        showMessage(`${extension.toUpperCase()} でダウンロードしました — ${baseName}.${extension}`, 'success');
     }
 
     function setDownloadButtonsDisabled(disabled) {
-        downloadPngButton.disabled = disabled;
+        downloadPngButton.disabled  = disabled;
         downloadWebpButton.disabled = disabled;
-        downloadJpgButton.disabled = disabled;
+        downloadJpgButton.disabled  = disabled;
     }
 
     imageUpload.addEventListener('change', (event) => {
         const file = event.target.files[0];
         if (!file) return;
-
         const reader = new FileReader();
         reader.onload = (e) => {
             const img = new Image();
@@ -307,8 +365,8 @@
                 canvas.height = img.height;
                 ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                 generateButton.disabled = false;
-                setDownloadButtonsDisabled(true); // 全てのダウンロードボタンを無効化
-                showMessage('画像を正常に読み込みました！', 'success');
+                setDownloadButtonsDisabled(true);
+                showMessage('画像を読み込みました', 'success');
             };
             img.src = e.target.result;
         };
@@ -320,144 +378,75 @@
     });
 
     generateButton.addEventListener('click', () => {
-        if (!currentImage) {
-            showMessage('まず画像をアップロードしてください。', 'error');
-            return;
-        }
-
+        if (!currentImage) { showMessage('画像をアップロードしてください', 'error'); return; }
         generateButton.disabled = true;
-        generateButton.textContent = '処理中...';
+        generateButton.textContent = '処理中…';
         setDownloadButtonsDisabled(true);
 
-        // 非同期処理をシミュレートし、UIをブロックしないようにする
         setTimeout(() => {
             try {
-                // ... (生成ロジックは前回と同じ)
                 ctx.drawImage(currentImage, 0, 0, canvas.width, canvas.height);
                 const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
                 const data = imageData.data;
-                const width = canvas.width;
-                const height = canvas.height;
+                const width = canvas.width, height = canvas.height;
                 const pointCount = parseInt(pointCountInput.value);
 
-                // Delaunay/Voronoiの代わりに単純なボロノイ処理を実行
                 const points = [];
-                for (let i = 0; i < pointCount; i++) {
-                    points.push({
-                        x: Math.random() * width,
-                        y: Math.random() * height,
-                        r: 0, g: 0, b: 0, count: 0
-                    });
-                }
+                for (let i = 0; i < pointCount; i++)
+                    points.push({ x: Math.random() * width, y: Math.random() * height, r: 0, g: 0, b: 0, count: 0 });
 
-                // 各ピクセルが属する最も近い点の平均色を計算
                 for (let y = 0; y < height; y++) {
                     for (let x = 0; x < width; x++) {
                         const index = (y * width + x) * 4;
-                        const r = data[index];
-                        const g = data[index + 1];
-                        const b = data[index + 2];
-
-                        let minDistanceSq = Infinity;
-                        let nearestPointIndex = -1;
-
+                        const r = data[index], g = data[index + 1], b = data[index + 2];
+                        let minDistSq = Infinity, nearest = -1;
                         for (let i = 0; i < pointCount; i++) {
                             const p = points[i];
-                            const dx = x - p.x;
-                            const dy = y - p.y;
-                            const distanceSq = dx * dx + dy * dy;
-
-                            if (distanceSq < minDistanceSq) {
-                                minDistanceSq = distanceSq;
-                                nearestPointIndex = i;
-                            }
+                            const d = (x - p.x) ** 2 + (y - p.y) ** 2;
+                            if (d < minDistSq) { minDistSq = d; nearest = i; }
                         }
-
-                        if (nearestPointIndex !== -1) {
-                            const p = points[nearestPointIndex];
-                            p.r += r;
-                            p.g += g;
-                            p.b += b;
-                            p.count++;
-                        }
+                        if (nearest !== -1) { const p = points[nearest]; p.r += r; p.g += g; p.b += b; p.count++; }
                     }
                 }
 
-                // 各ボロノイ領域の平均色を確定
                 points.forEach(p => {
-                    if (p.count > 0) {
-                        p.r = Math.floor(p.r / p.count);
-                        p.g = Math.floor(p.g / p.count);
-                        p.b = Math.floor(p.b / p.count);
-                    }
+                    if (p.count > 0) { p.r = Math.floor(p.r / p.count); p.g = Math.floor(p.g / p.count); p.b = Math.floor(p.b / p.count); }
                 });
 
                 const outputData = new Uint8ClampedArray(data.length);
-
-                // ボロノイ領域を平均色で塗りつぶす
                 for (let y = 0; y < height; y++) {
                     for (let x = 0; x < width; x++) {
                         const index = (y * width + x) * 4;
-
-                        let minDistanceSq = Infinity;
-                        let nearestPointIndex = -1;
-
+                        let minDistSq = Infinity, nearest = -1;
                         for (let i = 0; i < pointCount; i++) {
                             const p = points[i];
-                            const dx = x - p.x;
-                            const dy = y - p.y;
-                            const distanceSq = dx * dx + dy * dy;
-
-                            if (distanceSq < minDistanceSq) {
-                                minDistanceSq = distanceSq;
-                                nearestPointIndex = i;
-                            }
+                            const d = (x - p.x) ** 2 + (y - p.y) ** 2;
+                            if (d < minDistSq) { minDistSq = d; nearest = i; }
                         }
-
-                        if (nearestPointIndex !== -1) {
-                            const p = points[nearestPointIndex];
-                            outputData[index] = p.r;
-                            outputData[index + 1] = p.g;
-                            outputData[index + 2] = p.b;
-                            outputData[index + 3] = 255;
+                        if (nearest !== -1) {
+                            const p = points[nearest];
+                            outputData[index] = p.r; outputData[index + 1] = p.g;
+                            outputData[index + 2] = p.b; outputData[index + 3] = 255;
                         }
                     }
                 }
 
-                const outputImageData = new ImageData(outputData, width, height);
-                ctx.putImageData(outputImageData, 0, 0);
-                // ... (生成ロジックここまで)
-
-                showMessage('ポリゴンアートの生成に成功しました！', 'success');
-                setDownloadButtonsDisabled(false); // 全てのダウンロードボタンを有効化
-
-            } catch (error) {
-                console.error("Generation failed:", error);
-                showMessage('生成中にエラーが発生しました。', 'error');
+                ctx.putImageData(new ImageData(outputData, width, height), 0, 0);
+                showMessage('生成が完了しました', 'success');
+                setDownloadButtonsDisabled(false);
+            } catch (e) {
+                console.error(e);
+                showMessage('生成中にエラーが発生しました', 'error');
             } finally {
                 generateButton.disabled = false;
-                generateButton.textContent = 'アートを生成';
+                generateButton.textContent = 'Generate';
             }
         }, 50);
     });
 
-    // PNGダウンロード
-    downloadPngButton.addEventListener('click', () => {
-        if (downloadPngButton.disabled) return;
-        downloadArt('image/png', 'png');
-    });
-
-    // WEBPダウンロード
-    downloadWebpButton.addEventListener('click', () => {
-        if (downloadWebpButton.disabled) return;
-        downloadArt('image/webp', 'webp', 0.9); 
-    });
-
-    // JPGダウンロード
-    downloadJpgButton.addEventListener('click', () => {
-        if (downloadJpgButton.disabled) return;
-        downloadArt('image/jpeg', 'jpg', 0.9);
-    });
+    downloadPngButton.addEventListener('click',  () => { if (!downloadPngButton.disabled)  downloadArt('image/png',  'png'); });
+    downloadWebpButton.addEventListener('click', () => { if (!downloadWebpButton.disabled) downloadArt('image/webp', 'webp', 0.9); });
+    downloadJpgButton.addEventListener('click',  () => { if (!downloadJpgButton.disabled)  downloadArt('image/jpeg', 'jpg',  0.9); });
 
     window.onload = () => {
         initializeFirebase();
