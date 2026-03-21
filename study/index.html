@@ -183,7 +183,7 @@
         }
 
         button {
-            padding: 15px 30px;
+            padding: 15px 20px;
             font-size: 1rem;
             border: none;
             border-radius: 24px;
@@ -651,7 +651,7 @@
         .theme-option-preview {
             width: 100%;
             height: 40px;
-            border-radius: 12px;
+            border-radius: 24px;
             display: flex;
             gap: 3px;
             padding: 5px;
@@ -659,7 +659,7 @@
 
         .theme-option-preview div {
             flex: 1;
-            border-radius: 8px;
+            border-radius: 24px;
         }
 
         .copyright {
@@ -735,6 +735,10 @@
             text-align: left;
         }
 
+        .music-file-section {
+            margin-bottom: 25px;
+        }
+
         .music-controls {
             display: flex;
             gap: 10px;
@@ -742,33 +746,38 @@
             flex-wrap: wrap;
         }
 
-
         .file-select-group {
             display: flex;
             align-items: center;
             gap: 6px;
             position: relative;
             width: 100%;
+            flex-wrap: wrap;
         }
 
-        /* file label contains left arrow + text */
         .file-select-label {
             display: block;
             position: relative;
             flex: 1;
-            padding: 12px 15px;
-            padding-right: 44px;
-            /* space for right arrow */
+            padding: 12px 44px;
             border-radius: 24px;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             cursor: pointer;
             transition: all 0.2s;
             user-select: none;
             text-align: center;
             background: var(--panel-light);
+            font-weight: 400;
         }
 
-        /* place arrow at fixed right inside the label, text stays centered */
+        .dark .file-select-label {
+            background: var(--panel-dark);
+        }
+
+        .file-select-label:hover {
+            opacity: 0.85;
+        }
+
         .file-select-label .file-select-arrow {
             position: absolute;
             right: 12px;
@@ -784,149 +793,457 @@
             display: inline-block;
             width: 100%;
             pointer-events: none;
-            /* allow label to receive clicks */
             text-align: center;
         }
 
         .file-dropdown-menu {
             position: absolute;
             top: calc(100% + 8px);
+            left: 0;
             right: 0;
             min-width: 160px;
             background: var(--panel-light);
             color: #323232;
             border-radius: 24px;
-            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
-            z-index: 60;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            z-index: 1000;
             display: none;
             overflow: hidden;
         }
 
+        .dark .file-dropdown-menu {
+            background: var(--panel-dark);
+            color: #e8e8e8;
+        }
+
         .file-dropdown-menu .dropdown-item {
-            padding: 10px 12px;
+            padding: 10px 14px;
             cursor: pointer;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
+            transition: all 0.2s;
         }
 
         .file-dropdown-menu .dropdown-item:hover {
             background: var(--panel-light-hover);
         }
 
+        .dark .file-dropdown-menu .dropdown-item:hover {
+            background: var(--panel-dark-2);
+        }
+
         .music-controls input[type="file"] {
             display: none;
         }
 
-        .light .music-controls label {
-            background-color: var(--panel-light);
-            color: #323232;
+        /* Music display panel - modern design */
+        .music-display-panel {
+            background: var(--panel-light);
+            border-radius: 24px;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: all 0.3s;
         }
 
-        .dark .music-controls label {
-            background-color: var(--panel-dark);
-            color: #e8e8e8;
+        .dark .music-display-panel {
+            background: var(--panel-dark);
         }
 
-        .music-controls label:hover {
+        .music-info-header {
+            margin-bottom: 16px;
+        }
+
+        .music-title-display {
+            font-size: 1rem;
+            font-weight: 400;
+            margin-bottom: 12px;
+            opacity: 0.9;
+            min-height: 24px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .music-progress-section {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .time-display {
+            font-size: 0.8rem;
+            opacity: 0.7;
+            text-align: right;
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 0.3px;
+        }
+
+        .progress-wrapper {
+            width: 100%;
+        }
+
+        .progress-container {
+            flex: 1;
+            height: 8px;
+            background: rgba(0, 0, 0, 0.08);
+            border-radius: 24px;
+            position: relative;
+            cursor: pointer;
+            overflow: hidden;
+        }
+
+        .dark .progress-container {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .progress-bar {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 0%;
+            background: var(--primary-color);
+            border-radius: 24px;
+            transition: width 0.1s linear;
+        }
+
+        .dark .progress-bar {
+            background: var(--primary-color-dark);
+        }
+
+        .progress-handle {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #fff;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+            display: none;
+            cursor: grab;
+            transition: all 0.2s;
+        }
+
+        .progress-handle:active {
+            cursor: grabbing;
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Player main controls */
+        .player-main-controls {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .player-btn {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            border-radius: 50%;
+        }
+
+        .player-btn img {
+            width: 20px;
+            height: 20px;
+            opacity: 0.75;
+            transition: opacity 0.2s;
+        }
+
+        .player-btn:hover {
+            opacity: 1;
+        }
+
+        .player-btn:active {
+            transform: scale(0.95);
+        }
+
+        .main-play-btn {
+            background: var(--primary-color);
+            padding: 12px;
+            border-radius: 50%;
+        }
+
+        .dark .main-play-btn {
+            background: var(--primary-color-dark);
+        }
+
+        .main-play-btn img {
+            width: 24px;
+            height: 24px;
+            opacity: 1;
+            filter: brightness(0) invert(1);
+        }
+
+        .main-play-btn:hover {
+            opacity: 0.9;
+        }
+
+        /* Player sub controls */
+        .player-sub-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .dark .player-sub-controls {
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .volume-control-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 0 0 auto;
+        }
+
+        .control-btn {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            border-radius: 50%;
+            opacity: 0.65;
+        }
+
+        .control-btn img {
+            width: 18px;
+            height: 18px;
+        }
+
+        .control-btn:hover {
+            opacity: 0.9;
+            background: rgba(0, 0, 0, 0.03);
+        }
+
+        .dark .control-btn:hover {
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .control-btn:active {
+            transform: scale(0.92);
+        }
+
+        .volume-slider {
+            width: 80px;
+            height: 4px;
+            border-radius: 24px;
+            background: rgba(0, 0, 0, 0.08);
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+            cursor: pointer;
+        }
+
+        .dark .volume-slider {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .dark .volume-slider::-webkit-slider-thumb {
+            background: var(--primary-color-dark);
+        }
+
+        .volume-slider::-moz-range-thumb {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            border: none;
+        }
+
+        .dark .volume-slider::-moz-range-thumb {
+            background: var(--primary-color-dark);
+        }
+
+        .playlist-controls {
+            display: flex;
+            gap: 6px;
+        }
+
+        .playlist-controls .control-btn {
+            opacity: 0.5;
+        }
+
+        .playlist-controls .control-btn.active {
             opacity: 0.8;
         }
 
-        .music-controls button {
-            padding: 12px 20px;
-            font-size: 0.9rem;
+        /* Playlist section */
+        .playlist-section {
+            margin-top: 16px;
         }
 
-        .player-controls {
+        .playlist-header {
             display: flex;
-            gap: 10px;
+            justify-content: space-between;
             align-items: center;
-            margin-bottom: 25px;
-            flex-wrap: wrap;
+            margin-bottom: 10px;
+            padding: 0 4px;
         }
 
-        .player-controls button {
-            padding: 10px 20px;
-            font-size: 0.9rem;
+        .playlist-header h3 {
+            font-size: 0.95rem;
+            font-weight: 400;
+            margin: 0;
+            opacity: 0.85;
         }
 
-        .player-controls .control-icon {
-            font-size: 1.2rem;
+        .playlist-count {
+            font-size: 0.8rem;
+            opacity: 0.6;
+            background: transparent;
+            padding: 4px 8px;
+            border-radius: 8px;
+        }
+
+        .dark .playlist-count {
+            background: transparent;
         }
 
         .playlist {
             max-height: 300px;
             overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        /* Scrollbar styling */
+        .playlist::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .playlist::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .playlist::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 3px;
+        }
+
+        .dark .playlist::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
         }
 
         .playlist-item {
-            padding: 12px 15px;
+            padding: 12px 14px;
             border-radius: 24px;
-            margin-bottom: 8px;
+            margin-bottom: 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
             cursor: pointer;
             transition: all 0.2s;
             gap: 10px;
-        }
-
-        .light .playlist-item {
-            background-color: var(--panel-light);
+            background: rgba(0, 0, 0, 0.02);
         }
 
         .dark .playlist-item {
-            background-color: var(--panel-dark);
+            background: rgba(255, 255, 255, 0.03);
         }
 
         .playlist-item:hover {
-            opacity: 0.8;
+            background: rgba(0, 0, 0, 0.04);
+        }
+
+        .dark .playlist-item:hover {
+            background: rgba(255, 255, 255, 0.06);
         }
 
         .playlist-item.playing {
-            border: 2px solid var(--primary-color);
-            background-color: rgba(157, 180, 200, 0.1);
+            background: var(--primary-color);
+            color: white;
+            border: none;
         }
 
         .dark .playlist-item.playing {
-            border-color: var(--primary-color-dark);
-        }
-
-        .filter-control-btn {
-            padding: 8px 16px;
-            font-size: 0.85rem;
-            border-radius: 24px;
-            transition: all 0.2s;
-        }
-
-        .light .filter-control-btn.active {
-            background-color: var(--primary-color);
-            color: white;
-        }
-
-        .dark .filter-control-btn.active {
-            background-color: var(--primary-color-dark);
-            color: white;
+            background: var(--primary-color-dark);
         }
 
         .playlist-item-info {
             flex: 1;
             min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
         }
 
         .playlist-item-title {
-            font-weight: 500;
+            font-weight: 400;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            font-size: 0.9rem;
+        }
+
+        .playlist-item.playing .playlist-item-title {
+            color: white;
         }
 
         .playlist-item-buttons {
             display: flex;
-            gap: 5px;
+            gap: 6px;
+        }
+
+        .playlist-item:hover .playlist-item-buttons {
+            opacity: 1;
+        }
+
+        .playlist-item.playing .playlist-item-buttons {
+            opacity: 1;
         }
 
         .playlist-item button {
             padding: 6px 12px;
             font-size: 0.8rem;
+            background-color: #d66;
+            color: white;
+            border: none;
+            border-radius: 24px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .playlist-item:hover button {
+            opacity: 1;
+        }
+
+        .playlist-item button:hover {
+            background-color: #c55;
+        }
+
+        .playlist-item.playing button:hover {
+            background-color: #c55;
         }
 
         .todo-list {
@@ -1147,7 +1464,7 @@
             flex: 1;
             padding: 14px 24px;
             font-size: 1rem;
-            border-radius: 10px;
+            border-radius: 24px;
             border: none;
             cursor: pointer;
             font-weight: 500;
@@ -1456,6 +1773,7 @@
             box-shadow: none;
             cursor: pointer;
             transition: box-shadow 120ms ease, transform 120ms ease;
+            border-radius: 24px;
         }
 
         .custom-select:focus-within select {
@@ -1979,10 +2297,33 @@
             color: #95a5a6;
         }
 
+        .filter-control-btn,
+        .todo-filter-btn,
+        .todo-view-btn {
+            padding: 10px 16px;
+            font-size: 0.9rem;
+            line-height: 1.2;
+            border-radius: 24px;
+            min-height: 40px;
+        }
+
+        .light .filter-control-btn.active,
+        .light .todo-filter-btn.active,
+        .light .todo-view-btn.active {
+            background-color: var(--primary-color) !important;
+            color: white !important;
+        }
+
 
 
         .dark .todo-filter-btn.active {
             background-color: var(--primary-color-dark) !important;
+        }
+
+        .dark .filter-control-btn.active,
+        .dark .todo-view-btn.active {
+            background-color: var(--primary-color-dark) !important;
+            color: white !important;
         }
 
         .todo-meta {
@@ -2253,6 +2594,38 @@
             flex-direction: column;
             gap: 12px;
             border: 1px solid rgba(0, 0, 0, 0.02);
+        }
+
+        .todo-v2-summary {
+            margin-top: 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+
+        .todo-v2-toggle-btn {
+            border: none;
+            background: transparent;
+            color: inherit;
+            font-size: 0.9rem;
+            cursor: pointer;
+            padding: 2px 6px;
+            border-radius: 24px;
+            line-height: 1;
+        }
+
+        .light .todo-v2-toggle-btn:hover {
+            background: rgba(0, 0, 0, 0.06);
+        }
+
+        .dark .todo-v2-toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .todo-v2-details.collapsed {
+            display: none;
         }
 
         .dark .todo-v2-details {
@@ -3210,7 +3583,7 @@
     </div>
 
     <div class="container">
-        <h1 data-i18n="studyTimeManagement">ツミキ | 勉強時間管理</h1>
+        <h1 data-i18n="studyTimeManagement">ツミキ</h1>
 
         <div class="menu" id="mainMenu">
             <button class="active" onclick="showPage('timer')" data-page="timer" data-i18n="menuTimer">タイマー</button>
@@ -3308,7 +3681,7 @@
 
         <div id="musicPage" class="page">
             <div class="music-player">
-                <div class="music-controls">
+                <div class="music-file-section">
                     <div class="file-select-group">
                         <label class="file-select-label" id="musicFileLabel" tabindex="0" role="button"
                             aria-haspopup="true">
@@ -3327,55 +3700,60 @@
                             style="display:none;" onchange="addMusicFile(event)">
                     </div>
                 </div>
+
                 <audio id="audioPlayer" style="display:none;" playsinline webkit-playsinline></audio>
-                <div class="custom-player" style="width:100%; margin-bottom:12px;">
-                    <div style="display:flex; align-items:center; gap:12px;">
-                        <div id="timeDisplay" style="min-width:110px; font-size:0.95rem;">0:00 / 0:00</div>
-                        <div id="progressContainer"
-                            style="flex:1; height:10px; background:#ddd; border-radius:24px; position:relative; cursor:pointer;">
-                            <div id="progressBar"
-                                style="position:absolute; left:0; top:0; bottom:0; width:0%; background:var(--primary-color); border-radius:24px;">
-                            </div>
-                            <div id="progressHandle"
-                                style="position:absolute; left:0; top:50%; transform:translate(-50%,-50%); width:12px; height:12px; border-radius:50%; background:#fff; box-shadow:0 0 2px rgba(0,0,0,0.2); display:none;">
+
+                <div class="music-display-panel">
+                    <div class="music-info-header">
+                        <div class="music-title-display" id="musicTitleDisplay">楽曲を選択してください</div>
+                        <div class="music-progress-section">
+                            <div class="time-display" id="timeDisplay">0:00 / 0:00</div>
+                            <div class="progress-wrapper">
+                                <div id="progressContainer" class="progress-container">
+                                    <div id="progressBar" class="progress-bar"></div>
+                                    <div id="progressHandle" class="progress-handle"></div>
+                                </div>
                             </div>
                         </div>
-                        <div style="width:36px; text-align:right;">
-                            <button class="secondary" id="volumeBtn"
-                                style="background:transparent;border:none;cursor:pointer;padding:4px;">
-                                <img id="volumeBtnImg" src="volume.webp" alt="音量" style="width:20px;height:20px;"
-                                    data-i18n-alt="volume">
+                    </div>
+
+                    <div class="player-main-controls">
+                        <button class="player-btn prev-btn" onclick="playPrevious()" aria-label="前へ" data-i18n-aria="previous">
+                            <img id="prevBtnImg" src="prev.webp" alt="前へ" data-i18n-alt="previous">
+                        </button>
+                        <button class="player-btn play-btn main-play-btn" onclick="togglePlay()" aria-label="再生/一時停止" data-i18n-aria="playPause">
+                            <img id="playIconImg" src="play.webp" alt="再生" data-i18n-alt="play">
+                        </button>
+                        <button class="player-btn next-btn" onclick="playNext()" aria-label="次へ" data-i18n-aria="next">
+                            <img id="nextBtnImg" src="next.webp" alt="次へ" data-i18n-alt="next">
+                        </button>
+                    </div>
+
+                    <div class="player-sub-controls">
+                        <div class="volume-control-group">
+                            <button class="control-btn" id="volumeBtn" aria-label="音量">
+                                <img id="volumeBtnImg" src="volume.webp" alt="音量" data-i18n-alt="volume">
+                            </button>
+                            <input id="volumeSlider" type="range" min="0" max="1" step="0.01" value="1" class="volume-slider">
+                        </div>
+                        <div class="playlist-controls">
+                            <button class="control-btn" onclick="toggleLoop()" id="loopBtn" aria-label="ループ" data-i18n-aria="loop">
+                                <img id="loopBtnImg" src="loop_off.webp" alt="ループオフ" data-i18n-alt="loopOff">
+                            </button>
+                            <button class="control-btn" onclick="toggleShuffle()" id="shuffleBtn" aria-label="シャッフル" data-i18n-aria="shuffle">
+                                <img id="shuffleBtnImg" src="shuffle_off.webp" alt="シャッフルオフ" data-i18n-alt="shuffleOff">
                             </button>
                         </div>
                     </div>
-                    <input id="volumeSlider" type="range" min="0" max="1" step="0.01" value="1"
-                        style="width:100%; margin-top:8px; display:none;">
                 </div>
-                <div class="player-controls">
-                    <button class="secondary" onclick="playPrevious()" aria-label="前へ" data-i18n-aria="previous">
-                        <img id="prevBtnImg" src="prev.webp" alt="前へ" style="width:24px;height:24px;"
-                            data-i18n-alt="previous">
-                    </button>
-                    <button class="secondary" onclick="togglePlay()" aria-label="再生/一時停止" data-i18n-aria="playPause">
-                        <img id="playIconImg" src="play.webp" alt="再生" style="width:24px;height:24px;"
-                            data-i18n-alt="play">
-                    </button>
-                    <button class="secondary" onclick="playNext()" aria-label="次へ" data-i18n-aria="next">
-                        <img id="nextBtnImg" src="next.webp" alt="次へ" style="width:24px;height:24px;"
-                            data-i18n-alt="next">
-                    </button>
-                    <button class="secondary" onclick="toggleLoop()" id="loopBtn" aria-label="ループ"
-                        data-i18n-aria="loop">
-                        <img id="loopBtnImg" src="loop_off.webp" alt="ループオフ" style="width:24px;height:24px;"
-                            data-i18n-alt="loopOff">
-                    </button>
-                    <button class="secondary" onclick="toggleShuffle()" id="shuffleBtn" aria-label="シャッフル"
-                        data-i18n-aria="shuffle">
-                        <img id="shuffleBtnImg" src="shuffle_off.webp" alt="シャッフルオフ" style="width:24px;height:24px;"
-                            data-i18n-alt="shuffleOff">
-                    </button>
+
+                <div class="playlist-section">
+                    <div class="playlist-header">
+                        <h3 data-i18n="playlist">プレイリスト</h3>
+                        <span class="playlist-count" id="playlistCount">0</span>
+                    </div>
+                    <div class="playlist" id="playlist"></div>
                 </div>
-                <div class="playlist" id="playlist"></div>
             </div>
         </div>
         <div id="todoPage" class="page">
@@ -3516,6 +3894,18 @@
                         <div class="toggle-slider"></div>
                     </div>
                 </div>
+                <div class="toggle-item">
+                    <span data-i18n="stopMusicOnTimerEnd">タイマー終了時に音楽を一時停止</span>
+                    <div class="toggle-switch" id="toggleStopMusicOnTimerEnd" onclick="toggleStopMusicOnTimerEnd()">
+                        <div class="toggle-slider"></div>
+                    </div>
+                </div>
+                <div class="toggle-item">
+                    <span data-i18n="musicResumeOnTapAfterReload">更新後に画面タップで音楽を自動再開</span>
+                    <div class="toggle-switch" id="toggleMusicResumeOnTap" onclick="toggleMusicResumeOnTap()">
+                        <div class="toggle-slider"></div>
+                    </div>
+                </div>
             </div>
 
             <div class="settings-section">
@@ -3643,12 +4033,11 @@
                         <div class="toggle-slider"></div>
                     </div>
                 </div>
-                <!-- <div class="toggle-item" style="margin-top: 12px;"> -->
+                <div>
                     <!-- <span style="font-size: 0.9rem; opacity: 0.7;">開発者モード</span> -->
                     <!-- <div class="toggle-switch" id="toggleDevMode" onclick="toggleDevMode()"> -->
-                        <!-- <div class="toggle-slider"></div> -->
-                    <!-- </div> -->
-                <!-- </div> -->
+                    <!-- <div class="toggle-slider"></div> -->
+                </div>
                 <div style="margin-top: 15px;">
                     <div style="margin-bottom: 15px;">
                         <label style="font-size: 0.9rem; opacity: 0.8; display: block; margin-bottom: 8px;"
@@ -3930,7 +4319,7 @@
                 const translations = {
                     ja: {
                         // メタ
-                        title: 'ツミキ | 勉強時間管理',
+                        title: 'ツミキ',
                         description: '勉強とともにタイマーをスタートし、作業時間を記録しましょう。',
 
 
@@ -4086,6 +4475,8 @@
                         lockSettingsDuringTimer: 'タイマー作動中は設定を無効化',
                         loadingAnimSetting: 'ローディングアニメーション表示',
                         autoPiP: '自動ミニモード (PiP)',
+                        stopMusicOnTimerEnd: 'タイマー終了時に音楽を一時停止',
+                        musicResumeOnTapAfterReload: '更新後に画面タップで音楽を自動再開',
                         graphDisplay: 'グラフ表示',
                         studyGraph: '勉強時間のグラフ表示',
                         graphType: 'グラフの種類',
@@ -4177,7 +4568,7 @@
 
                         // 汎用
                         confirmDefaultTitle: '確認',
-                        studyTimeManagement: 'ツミキ | 勉強時間管理',
+                        studyTimeManagement: 'ツミキ',
                         cancelButton: 'キャンセル',
                         errorTitle: 'エラー',
                         invalidFileFormat: '無効なファイル形式です。',
@@ -4188,7 +4579,7 @@
                         // About & QA
                         aboutContent: `<div style="text-align: center; margin-bottom: 20px;">
                         <div><img src="guide.webp" style="width: 3rem; height: 3rem;"></div>
-                        <h3 style="margin-top: 0;">Tsumiki | Study Time Manager</h3>
+                        <h3 style="margin-top: 0;">Tsumiki</h3>
                         <p>シンプルで使いやすい勉強時間管理ツール。</p>
                         このサイトは<a href="https://kokyujene.super-hiko14.com/members/super-hiko14/">Super Hiko14</a>が開発しました。<div class="tyuui-mini-text">※ 一部AIが使用されています。</div>
                         </div>`,
@@ -4298,7 +4689,7 @@
                         licenseTitle: 'Font Licenses',
 
                         // Meta
-                        title: 'Tsumiki | Study Time Manager',
+                        title: 'Tsumiki',
                         description: 'Start the timer with your study session and track your work time.',
 
                         // Main Menu
@@ -4405,6 +4796,8 @@
                         lockSettingsDuringTimer: 'Lock Settings during Timer',
                         loadingAnimSetting: 'Show Loading Animation on Start',
                         autoPiP: 'Auto Mini Mode (PiP)',
+                        stopMusicOnTimerEnd: 'Pause music when timer ends',
+                        musicResumeOnTapAfterReload: 'Resume music on tap after reload',
                         graphDisplay: 'Graph Display',
                         studyGraph: 'Show Study Time Graph',
                         graphType: 'Graph Type',
@@ -4584,13 +4977,13 @@
 
                         // General
                         confirmDefaultTitle: 'Confirm',
-                        studyTimeManagement: 'Tsumiki | Study Time Manager',
+                        studyTimeManagement: 'Tsumiki',
                         cancelButton: 'Cancel',
 
                         // About & QA
                         aboutContent: `<div style="text-align: center; margin-bottom: 20px;">
                         <div><img src="guide.webp" style="width: 3rem; height: 3rem;"></div>
-                        <h3 style="margin-top: 0;">Tsumiki | Study Time Manager</h3>
+                        <h3 style="margin-top: 0;">Tsumiki</h3>
                         <p>Simple and easy-to-use study time management tool.</p>
                         Developed by <a href="https://kokyujene.super-hiko14.com/members/super-hiko14/">Super Hiko14</a>.<div class="tyuui-mini-text">* AI is used in some parts.</div>
                         </div>`,
@@ -5026,6 +5419,100 @@
                     return getData('feature_auto_pip') !== 'false';
                 }
 
+                function isStopMusicOnTimerEndEnabled() {
+                    return getData('feature_stop_music_on_timer_end') !== 'false';
+                }
+
+                function isMusicResumeOnTapEnabled() {
+                    return getData('feature_music_resume_on_tap_after_reload') !== 'false';
+                }
+
+                function clearMusicResumeState() {
+                    saveData('music_resume_pending', 'false');
+                    localStorage.removeItem('music_resume_index');
+                    localStorage.removeItem('music_resume_time');
+                    setCookie('music_resume_index', '', -1);
+                    setCookie('music_resume_time', '', -1);
+                }
+
+                function saveMusicResumeStateForReload() {
+                    const audio = document.getElementById('audioPlayer');
+                    if (!audio) return;
+
+                    const canResume = (
+                        isMusicResumeOnTapEnabled() &&
+                        currentMusicIndex >= 0 &&
+                        !!musicFiles[currentMusicIndex] &&
+                        !audio.paused
+                    );
+
+                    if (!canResume) {
+                        clearMusicResumeState();
+                        return;
+                    }
+
+                    saveData('music_resume_pending', 'true');
+                    saveData('music_resume_index', String(currentMusicIndex));
+                    saveData('music_resume_time', String(Math.max(0, audio.currentTime || 0)));
+                }
+
+                function setupMusicResumeOnNextGesture() {
+                    if (!isMusicResumeOnTapEnabled()) {
+                        clearMusicResumeState();
+                        return;
+                    }
+
+                    const pending = getData('music_resume_pending') === 'true';
+                    if (!pending) return;
+
+                    const savedIndex = parseInt(getData('music_resume_index') || '-1', 10);
+                    const savedTime = Math.max(0, parseFloat(getData('music_resume_time') || '0') || 0);
+
+                    if (!Number.isFinite(savedIndex) || savedIndex < 0 || !musicFiles[savedIndex]) {
+                        clearMusicResumeState();
+                        return;
+                    }
+
+                    const events = ['pointerdown', 'touchstart', 'click', 'keydown'];
+
+                    const resumeOnGesture = (e) => {
+                        if (e && e.isTrusted === false) return;
+
+                        const audio = document.getElementById('audioPlayer');
+                        if (!audio) {
+                            clearMusicResumeState();
+                            cleanup();
+                            return;
+                        }
+
+                        playMusic(savedIndex);
+
+                        const applySeek = () => {
+                            if (savedTime > 0) {
+                                try {
+                                    audio.currentTime = savedTime;
+                                } catch (_) {}
+                            }
+                        };
+
+                        if (audio.readyState >= 1) applySeek();
+                        else audio.addEventListener('loadedmetadata', applySeek, { once: true });
+
+                        clearMusicResumeState();
+                        cleanup();
+                    };
+
+                    function cleanup() {
+                        for (const evt of events) {
+                            document.removeEventListener(evt, resumeOnGesture, true);
+                        }
+                    }
+
+                    for (const evt of events) {
+                        document.addEventListener(evt, resumeOnGesture, true);
+                    }
+                }
+
                 function getActiveMusicTitle() {
                     if (currentMusicIndex >= 0 && musicFiles[currentMusicIndex]) {
                         return musicFiles[currentMusicIndex].title || 'Unknown track';
@@ -5318,7 +5805,7 @@
                     const totalSeconds = Math.floor(ms / 1000);
                     const minutes = Math.floor(totalSeconds / 60);
                     const seconds = totalSeconds % 60;
-                    return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                    return `${minutes}:${String(seconds).padStart(2, '0')}`;
                 }
 
                 function toggleFocusDisplaySetting() {
@@ -5364,7 +5851,7 @@
 
                         if (!startTime) {
                             const fd = getFocusDurationMs();
-                            timer.textContent = `${formatTimeShort(fd)} / 00:00`;
+                            timer.textContent = `${formatTimeShort(fd)} / ${formatTimeShort(0)}`;
                             subTimer.textContent = '00:00:00';
                         } else {
                             updateTimer();
@@ -5432,6 +5919,7 @@
 
                 // Compute focus mode breakdown from wall elapsed (stateless — no circular dependency)
                 function computeFocusCycle(wallElapsed) {
+                    wallElapsed = Math.max(0, wallElapsed);
                     const focusDur = getFocusDurationMs();
                     const breakDur = getBreakDurationMs();
                     const cycleDur = focusDur + breakDur;
@@ -5459,7 +5947,7 @@
                 function updateTimer() {
                     if (!startTime) return;
 
-                    const wallElapsed = Date.now() - startTime + pausedTime;
+                    const wallElapsed = Math.max(0, Date.now() - startTime + pausedTime);
 
                     if (focusEnabled) {
                         const fc = computeFocusCycle(wallElapsed);
@@ -5488,6 +5976,11 @@
                 
 
                 function startStudy() {
+                    if (timerInterval) {
+                        clearInterval(timerInterval);
+                        timerInterval = null;
+                    }
+
                     startTime = Date.now();
                     pausedTime = 0;
                     isPaused = false;
@@ -5544,6 +6037,14 @@
                     if (timerInterval) clearInterval(timerInterval);
                     exitMiniModePiP();
                     document.title = getText('studyTimeManagement');
+                    if (isStopMusicOnTimerEndEnabled()) {
+                        const audio = document.getElementById('audioPlayer');
+                        if (audio) {
+                            userInitiatedPause = true;
+                            audio.pause();
+                            updatePlayPauseUI(false);
+                        }
+                    }
                     const endTime = new Date();
                     const startCookie = getData('studyStartTime');
                     const groupInput = document.getElementById('groupInput');
@@ -5627,11 +6128,14 @@
                 // 新しいプレイリスト描画(handle と data-index を付与)
                 function loadPlaylist() {
                     const playlistDiv = document.getElementById('playlist');
+                    const playlistCount = document.getElementById('playlistCount');
                     if (musicFiles.length === 0) {
                         playlistDiv.innerHTML = `<div class="empty-state">${getText('emptyPlaylist')}</div>`;
+                        if (playlistCount) playlistCount.textContent = '0';
                         drawPiPCanvas();
                         return;
                     }
+                    if (playlistCount) playlistCount.textContent = musicFiles.length;
                     playlistDiv.innerHTML = musicFiles.map((item, index) => `
         <div class="playlist-item ${index === currentMusicIndex ? 'playing' : ''}" data-index="${index}">
             <div style="display:flex; align-items:center; gap:8px; flex:1; min-width:0;">
@@ -5649,6 +6153,7 @@
         </div>
     `).join('');
                     attachPlaylistHandlers();
+                    updateMusicTitleDisplay();
                     drawPiPCanvas();
                 }
 
@@ -5811,8 +6316,20 @@
                         const playImg = document.getElementById('playIconImg');
                         if (playImg) { playImg.src = 'pause.webp'; playImg.alt = '一時停止'; }
                         loadPlaylist();
+                        updateMusicTitleDisplay();
                         updateMediaSession(); // Media Session API更新
                         drawPiPCanvas();
+                    }
+                }
+
+                function updateMusicTitleDisplay() {
+                    const titleDisplay = document.getElementById('musicTitleDisplay');
+                    if (titleDisplay) {
+                        if (currentMusicIndex >= 0 && musicFiles[currentMusicIndex]) {
+                            titleDisplay.textContent = musicFiles[currentMusicIndex].title || 'Unknown track';
+                        } else {
+                            titleDisplay.textContent = '楽曲を選択してください';
+                        }
                     }
                 }
 
@@ -5824,8 +6341,7 @@
 
                     navigator.mediaSession.metadata = new MediaMetadata({
                         title: file.title,
-                        // ユーザー要望のサブタイトル(Artist フィールドを利用)
-                        artist: 'Tsumiki | Study Time Manager - Music',
+                        artist: 'Tsumiki - Music',
                         album: 'Local Playlist',
                         artwork: [
                             { src: 'music.png', sizes: '96x96', type: 'image/webp' },
@@ -5898,6 +6414,7 @@
                     } else {
                         userInitiatedPause = true;
                         audio.pause();
+                        clearMusicResumeState();
                         updatePlayPauseUI(false);
                     }
                 }
@@ -6016,7 +6533,7 @@
                 const volumeBtnImg = document.getElementById('volumeBtnImg');
                 const volumeSlider = document.getElementById('volumeSlider');
 
-                function formatTimeShort(msOrSec) {
+                function formatAudioTime(msOrSec) {
                     let totalSeconds = Math.floor(msOrSec);
                     if (msOrSec > 1000) totalSeconds = Math.floor(msOrSec / 1000);
                     const minutes = Math.floor(totalSeconds / 60);
@@ -6029,7 +6546,14 @@
                     const dur = audioEl.duration || 0;
                     const pct = dur ? (cur / dur) * 100 : 0;
                     if (progressBar) progressBar.style.width = `${pct}%`;
-                    if (timeDisplay) timeDisplay.textContent = `${formatTimeShort(cur)} / ${formatTimeShort(dur)}`;
+                    if (timeDisplay) timeDisplay.textContent = `${formatAudioTime(cur)} / ${formatAudioTime(dur)}`;
+
+                    // 再生中は復帰情報を定期保存して、更新後の再開ズレを最小化する
+                    if (!audioEl.paused && currentMusicIndex >= 0 && musicFiles[currentMusicIndex] && isMusicResumeOnTapEnabled()) {
+                        saveData('music_resume_pending', 'true');
+                        saveData('music_resume_index', String(currentMusicIndex));
+                        saveData('music_resume_time', String(Math.max(0, cur || 0)));
+                    }
                 });
 
                 if (progressContainer) {
@@ -6057,6 +6581,7 @@
                 }
 
                 let currentTodoFilter = 'all';
+                const todoDetailsExpanded = {};
 
                 function addTodo() {
                     const input = document.getElementById('todoInput');
@@ -6209,8 +6734,16 @@
                             else if (todo.completionStages.stage2) progress = 50;
                             else if (todo.completionStages.stage1) progress = 25;
 
+                            const isExpanded = !!todoDetailsExpanded[todo.id];
+                            const collapseClass = isExpanded ? '' : 'collapsed';
+                            const toggleIcon = isExpanded ? 'v' : '>';
+
                             v2Details = `
-                                <div class="todo-v2-details">
+                                <div class="todo-v2-summary">
+                                    <button class="todo-v2-toggle-btn" onclick="toggleTodoDetails('${todo.id}')">${toggleIcon}</button>
+                                    <span>${getText('sinchokudo')}: ${progress}%</span>
+                                </div>
+                                <div class="todo-v2-details ${collapseClass}">
                                     <div class="todo-stage-row">
                                         <p>${getText('sinchokudo')}</p><label class="todo-stage-label"><input type="checkbox" class="todo-stage-checkbox" ${s1} onchange="toggleTodoStage(${index}, 1)"></label>
                                         <label class="todo-stage-label"><input type="checkbox" class="todo-stage-checkbox" ${s2} onchange="toggleTodoStage(${index}, 2)"></label>
@@ -6240,6 +6773,12 @@
             </div>
         `;
                     }).join('');
+                }
+
+                function toggleTodoDetails(todoId) {
+                    if (!todoId) return;
+                    todoDetailsExpanded[todoId] = !todoDetailsExpanded[todoId];
+                    loadTodos();
                 }
 
                 function getRepeatLabel(repeat) {
@@ -7059,6 +7598,8 @@
                     'feature_title_time',
                     'feature_loading_anim',
                     'feature_auto_pip',
+                    'feature_stop_music_on_timer_end',
+                    'feature_music_resume_on_tap_after_reload',
                     'lock_settings_during_timer',
                     'feature_focus_mode_display',
                     'focus_mode_enabled',
@@ -7080,6 +7621,8 @@
                     'feature_title_time',
                     'feature_loading_anim',
                     'feature_auto_pip',
+                    'feature_stop_music_on_timer_end',
+                    'feature_music_resume_on_tap_after_reload',
                     'lock_settings_during_timer',
                     'feature_focus_mode_display',
                     'focus_mode_enabled',
@@ -7303,6 +7846,8 @@
                                 setToggleActive('toggleTitleTime', getData('feature_title_time') !== 'false');
                                 setToggleActive('toggleLoadingAnim', getData('feature_loading_anim') !== 'false');
                                 setToggleActive('toggleAutoPiP', getData('feature_auto_pip') !== 'false');
+                                setToggleActive('toggleStopMusicOnTimerEnd', getData('feature_stop_music_on_timer_end') !== 'false');
+                                setToggleActive('toggleMusicResumeOnTap', getData('feature_music_resume_on_tap_after_reload') !== 'false');
                                 setToggleActive('toggleLockSettings', getData('lock_settings_during_timer') === 'true');
                                 setToggleActive('toggleFocusDisplay', getData('feature_focus_mode_display') !== 'false');
 
@@ -8113,6 +8658,16 @@
                         if (toggle) toggle.classList.add('active');
                     }
 
+                    if (isStopMusicOnTimerEndEnabled()) { // デフォルトON
+                        const toggle = document.getElementById('toggleStopMusicOnTimerEnd');
+                        if (toggle) toggle.classList.add('active');
+                    }
+
+                    if (isMusicResumeOnTapEnabled()) { // デフォルトON
+                        const toggle = document.getElementById('toggleMusicResumeOnTap');
+                        if (toggle) toggle.classList.add('active');
+                    }
+
                     if (!isPiPSupported() || isLikelyMobileBrowser()) {
                         const toggle = document.getElementById('toggleAutoPiP');
                         if (toggle) {
@@ -8171,6 +8726,7 @@
                                     }
                                 }
                                 if (musicFiles.length > 0) loadPlaylist();
+                                setupMusicResumeOnNextGesture();
                             }
                         } catch (e) {
                             console.error('Failed to restore playlist from DB', e);
@@ -8236,6 +8792,14 @@
                         if (document.visibilityState === 'visible' && document.pictureInPictureElement === pipVideo) {
                             exitMiniModePiP();
                         }
+                    });
+
+                    window.addEventListener('pagehide', () => {
+                        saveMusicResumeStateForReload();
+                    });
+
+                    window.addEventListener('beforeunload', () => {
+                        saveMusicResumeStateForReload();
                     });
 
                     (function () {
@@ -8409,6 +8973,36 @@
                         saveData('feature_auto_pip', 'true');
                         // 有効化直後に、タイマー動作中なら次回ユーザー操作で解錠を試す
                         pipNeedsGestureUnlock = true;
+                    }
+                }
+
+                function toggleStopMusicOnTimerEnd() {
+                    const toggle = document.getElementById('toggleStopMusicOnTimerEnd');
+                    if (!toggle) return;
+                    const isActive = toggle.classList.contains('active');
+
+                    if (isActive) {
+                        toggle.classList.remove('active');
+                        saveData('feature_stop_music_on_timer_end', 'false');
+                    } else {
+                        toggle.classList.add('active');
+                        saveData('feature_stop_music_on_timer_end', 'true');
+                    }
+                }
+
+                function toggleMusicResumeOnTap() {
+                    const toggle = document.getElementById('toggleMusicResumeOnTap');
+                    if (!toggle) return;
+                    const isActive = toggle.classList.contains('active');
+
+                    if (isActive) {
+                        toggle.classList.remove('active');
+                        saveData('feature_music_resume_on_tap_after_reload', 'false');
+                        clearMusicResumeState();
+                    } else {
+                        toggle.classList.add('active');
+                        saveData('feature_music_resume_on_tap_after_reload', 'true');
+                        setupMusicResumeOnNextGesture();
                     }
                 }
 
