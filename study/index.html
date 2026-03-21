@@ -1110,6 +1110,41 @@
             padding: 0 4px;
         }
 
+        .playlist-header-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .playlist-select-toggle {
+            padding: 6px 12px;
+            font-size: 0.8rem;
+        }
+
+        .playlist-batch-actions {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 0 4px 10px;
+        }
+
+        .playlist-batch-actions.hidden {
+            display: none;
+        }
+
+        .playlist-batch-actions button {
+            padding: 6px 12px;
+            font-size: 0.8rem;
+        }
+
+        .playlist-selected-count {
+            font-size: 0.8rem;
+            opacity: 0.7;
+            min-width: 64px;
+            text-align: left;
+        }
+
         .playlist-header h3 {
             font-size: 0.95rem;
             font-weight: 400;
@@ -1166,6 +1201,7 @@
             transition: all 0.2s;
             gap: 10px;
             background: rgba(0, 0, 0, 0.02);
+            position: relative;
         }
 
         .dark .playlist-item {
@@ -1184,6 +1220,23 @@
             background: var(--primary-color);
             color: white;
             border: none;
+        }
+
+        .playlist-item.select-mode {
+            cursor: default;
+        }
+
+        .playlist-item input.playlist-item-checkbox {
+            width: 18px;
+            height: 18px;
+            flex: 0 0 auto;
+            margin-right: 6px;
+            cursor: pointer;
+        }
+
+        .playlist-item.selected {
+            outline: 2px solid rgba(33, 150, 243, 0.55);
+            outline-offset: -2px;
         }
 
         .dark .playlist-item.playing {
@@ -2464,9 +2517,23 @@
             }
         }
 
-        .playlist-item.drag-over {
-            border: 2px solid #2196F3;
-            background-color: rgba(33, 150, 243, 0.1);
+        .playlist-item.drag-over-top::before,
+        .playlist-item.drag-over-bottom::after {
+            content: '';
+            position: absolute;
+            left: 8px;
+            right: 8px;
+            height: 3px;
+            border-radius: 24px;
+            background: #2196F3;
+        }
+
+        .playlist-item.drag-over-top::before {
+            top: -2px;
+        }
+
+        .playlist-item.drag-over-bottom::after {
+            bottom: -2px;
         }
 
         /* 一貫した削除ボタン */
@@ -3750,7 +3817,15 @@
                 <div class="playlist-section">
                     <div class="playlist-header">
                         <h3 data-i18n="playlist">プレイリスト</h3>
-                        <span class="playlist-count" id="playlistCount">0</span>
+                        <div class="playlist-header-actions">
+                            <span class="playlist-count" id="playlistCount">0</span>
+                            <button id="playlistSelectModeBtn" class="secondary playlist-select-toggle" onclick="togglePlaylistSelectMode()" data-i18n="playlistSelectMode">選択</button>
+                        </div>
+                    </div>
+                    <div class="playlist-batch-actions hidden" id="playlistBatchActions">
+                        <span class="playlist-selected-count" id="playlistSelectedCount">0</span>
+                        <button class="secondary" onclick="toggleSelectAllPlaylistItems()" data-i18n="selectAll">すべて選択</button>
+                        <button class="delete-btn" onclick="deleteSelectedMusic()" data-i18n="deleteSelectedMusic">選択を削除</button>
                     </div>
                     <div class="playlist" id="playlist"></div>
                 </div>
@@ -4302,6 +4377,8 @@
                 let allHistoryItems = [];
                 let currentMusicIndex = -1;
                 let musicFiles = [];
+                let playlistSelectMode = false;
+                let selectedMusicItems = new Set();
                 let isLoop = false;
                 let isShuffle = false;
                 let _musicDB = null;
@@ -4380,7 +4457,11 @@
                         sortLongest: '時間が長い順',
                         sortShortest: '時間が短い順',
                         selectAll: 'すべて選択',
+                        moveUp: '上へ',
+                        moveDown: '下へ',
                         deleteSelected: '選択を削除',
+                        deleteSelectedMusic: '選択を削除',
+                        itemsSelected: '件選択',
                         moveGroup: 'グループ移動',
                         moveCount: '件選択中',
                         moveDestination: '移動先を選択',
@@ -4408,8 +4489,10 @@
                         shuffle: 'シャッフル',
                         shuffleOn: 'シャッフルオン',
                         shuffleOff: 'シャッフルオフ',
+                        musicSelectPrompt: '楽曲を選択してください',
                         volume: '音量',
                         playlist: 'プレイリスト',
+                        playlistSelectMode: '選択',
                         deleteButton: '削除',
                         renameButton: '名前変更',
                         renameSong: '曲名を変更',
@@ -4475,6 +4558,7 @@
                         lockSettingsDuringTimer: 'タイマー作動中は設定を無効化',
                         loadingAnimSetting: 'ローディングアニメーション表示',
                         autoPiP: '自動ミニモード (PiP)',
+                        autoPiPUnavailable: 'このブラウザでは自動ミニモード（PiP）は利用できません',
                         stopMusicOnTimerEnd: 'タイマー終了時に音楽を一時停止',
                         musicResumeOnTapAfterReload: '更新後に画面タップで音楽を自動再開',
                         graphDisplay: 'グラフ表示',
@@ -4673,6 +4757,8 @@
                         tutorialStep7Desc: 'ここでテーマの変更、音楽プレイヤーやToDoリストの有効化、データのエクスポート/インポートができます。',
                         tutorialStep8Title: 'テーマ切り替え',
                         tutorialStep8Desc: 'このボタンでダークモードとライトモードを切り替えられます。',
+                        toggleLightMode: 'ライトモードに切り替え',
+                        toggleDarkMode: 'ダークモードに切り替え',
                     },
                     en: {
                         // Font Settings
@@ -4730,7 +4816,11 @@
                         sortLongest: 'Longest First',
                         sortShortest: 'Shortest First',
                         selectAll: 'Select All',
+                        moveUp: 'Move Up',
+                        moveDown: 'Move Down',
                         deleteSelected: 'Delete Selected',
+                        deleteSelectedMusic: 'Delete Selected',
+                        itemsSelected: ' selected',
                         moveGroup: 'Move to Group',
                         moveCount: 'selected',
                         moveDestination: 'Select destination',
@@ -4754,8 +4844,10 @@
                         shuffle: 'Shuffle',
                         shuffleOn: 'Shuffle On',
                         shuffleOff: 'Shuffle Off',
+                        musicSelectPrompt: 'Select a track',
                         volume: 'Volume',
                         playlist: 'Playlist',
+                        playlistSelectMode: 'Select',
                         deleteButton: 'Delete',
                         renameButton: 'Rename',
                         renameSong: 'Rename Song',
@@ -4796,6 +4888,7 @@
                         lockSettingsDuringTimer: 'Lock Settings during Timer',
                         loadingAnimSetting: 'Show Loading Animation on Start',
                         autoPiP: 'Auto Mini Mode (PiP)',
+                        autoPiPUnavailable: 'Auto Mini Mode (PiP) is not available in this browser',
                         stopMusicOnTimerEnd: 'Pause music when timer ends',
                         musicResumeOnTapAfterReload: 'Resume music on tap after reload',
                         graphDisplay: 'Graph Display',
@@ -5033,12 +5126,33 @@
                         guideAlt: 'Guide',
                         themeToggleAlt: 'Toggle theme',
                         settingsAlt: 'Settings',
+                        toggleLightMode: 'Switch to light mode',
+                        toggleDarkMode: 'Switch to dark mode',
                     }
                 };
 
                 // 翻訳テキストを取得
                 function getText(key) {
-                    return translations[currentLanguage][key] || translations['ja'][key] || key;
+                    const currentDict = translations[currentLanguage] || {};
+                    if (Object.prototype.hasOwnProperty.call(currentDict, key)) {
+                        return currentDict[key];
+                    }
+
+                    if (currentLanguage === 'en') {
+                        return key;
+                    }
+
+                    const enDict = translations.en || {};
+                    if (Object.prototype.hasOwnProperty.call(enDict, key)) {
+                        return enDict[key];
+                    }
+
+                    const jaDict = translations.ja || {};
+                    if (Object.prototype.hasOwnProperty.call(jaDict, key)) {
+                        return jaDict[key];
+                    }
+
+                    return key;
                 }
 
                 // 言語を変更
@@ -5347,13 +5461,13 @@
                         body.classList.remove('light');
                         body.classList.add('dark');
                         themeIcon.src = 'sun.webp';
-                        themeIcon.alt = 'ライトモードに切り替え';
+                        themeIcon.alt = getText('toggleLightMode');
                         saveData('mode', 'dark');
                     } else {
                         body.classList.remove('dark');
                         body.classList.add('light');
                         themeIcon.src = 'moon.webp';
-                        themeIcon.alt = 'ダークモードに切り替え';
+                        themeIcon.alt = getText('toggleDarkMode');
                         saveData('mode', 'light');
                     }
 
@@ -6129,17 +6243,20 @@
                 function loadPlaylist() {
                     const playlistDiv = document.getElementById('playlist');
                     const playlistCount = document.getElementById('playlistCount');
+                    updatePlaylistSelectionUI();
                     if (musicFiles.length === 0) {
                         playlistDiv.innerHTML = `<div class="empty-state">${getText('emptyPlaylist')}</div>`;
                         if (playlistCount) playlistCount.textContent = '0';
+                        selectedMusicItems.clear();
+                        updatePlaylistSelectionUI();
                         drawPiPCanvas();
                         return;
                     }
                     if (playlistCount) playlistCount.textContent = musicFiles.length;
                     playlistDiv.innerHTML = musicFiles.map((item, index) => `
-        <div class="playlist-item ${index === currentMusicIndex ? 'playing' : ''}" data-index="${index}">
+        <div class="playlist-item ${index === currentMusicIndex ? 'playing' : ''} ${playlistSelectMode ? 'select-mode' : ''} ${selectedMusicItems.has(index) ? 'selected' : ''}" data-index="${index}">
             <div style="display:flex; align-items:center; gap:8px; flex:1; min-width:0;">
-                <img src="drag_handle.webp" class="drag-handle" data-index="${index}" aria-label="並べ替えハンドル" data-i18n-aria="dragHandle" style="width: 24px; height: 24px; cursor: grab; touch-action: none;" alt="">
+                ${playlistSelectMode ? `<input type="checkbox" class="playlist-item-checkbox" data-index="${index}" ${selectedMusicItems.has(index) ? 'checked' : ''} onclick="event.stopPropagation(); togglePlaylistItemSelection(${index}, this.checked)">` : ''}
                 <div class="playlist-item-info" style="flex:1; min-width:0;">
                     <div class="playlist-item-title">
                         <span class="title-text">${escapeHtml(item.title)}</span>
@@ -6147,8 +6264,8 @@
                 </div>
             </div>
             <div class="playlist-item-buttons">
-                <button class="secondary" onclick="event.stopPropagation(); startRename(${index})">${getText('renameButton')}</button>
-                <button class="delete-btn" onclick="event.stopPropagation(); deleteMusic(${index})">${getText('deleteButton')}</button>
+                ${playlistSelectMode ? '' : `<button class="secondary" onclick="event.stopPropagation(); startRename(${index})">${getText('renameButton')}</button>
+                <button class="delete-btn" onclick="event.stopPropagation(); deleteMusic(${index})">${getText('deleteButton')}</button>`}
             </div>
         </div>
     `).join('');
@@ -6169,11 +6286,15 @@
 
                     // 各プレイリストアイテムにドラッグを有効化
                     playlist.querySelectorAll('.playlist-item').forEach(item => {
-                        const idx = parseInt(item.getAttribute('data-index'), 10);
-                        item.setAttribute('draggable', 'true');
+                        item.setAttribute('draggable', playlistSelectMode ? 'false' : 'true');
 
                         // dragstart: ドラッグ開始
                         item.addEventListener('dragstart', (e) => {
+                            if (playlistSelectMode) {
+                                e.preventDefault();
+                                return;
+                            }
+                            const idx = parseInt(item.getAttribute('data-index'), 10);
                             _dragSrcIndex = idx;
                             e.dataTransfer.effectAllowed = 'move';
                             e.dataTransfer.setData('text/plain', String(idx));
@@ -6182,27 +6303,44 @@
 
                         // dragover: ドラッグ中は常にデフォルト動作を抑止
                         item.addEventListener('dragover', (e) => {
+                            if (playlistSelectMode) return;
                             e.preventDefault();
                             e.dataTransfer.dropEffect = 'move';
-                            item.classList.add('drag-over');
+                            playlist.querySelectorAll('.playlist-item').forEach(el => {
+                                if (el !== item) {
+                                    el.classList.remove('drag-over-top');
+                                    el.classList.remove('drag-over-bottom');
+                                }
+                            });
+                            const rect = item.getBoundingClientRect();
+                            const isTopHalf = (e.clientY - rect.top) < (rect.height / 2);
+                            item.classList.toggle('drag-over-top', isTopHalf);
+                            item.classList.toggle('drag-over-bottom', !isTopHalf);
                         });
 
                         // dragleave: ドラッグ対象外になった時
                         item.addEventListener('dragleave', () => {
-                            item.classList.remove('drag-over');
+                            item.classList.remove('drag-over-top');
+                            item.classList.remove('drag-over-bottom');
                         });
 
                         // drop: ドロップ時に並べ替え実行
                         item.addEventListener('drop', (e) => {
+                            if (playlistSelectMode) return;
                             e.preventDefault();
                             e.stopPropagation();
-                            item.classList.remove('drag-over');
+                            item.classList.remove('drag-over-top');
+                            item.classList.remove('drag-over-bottom');
 
                             const targetIndex = parseInt(item.getAttribute('data-index'), 10);
                             const src = _dragSrcIndex !== null ? _dragSrcIndex : parseInt(e.dataTransfer.getData('text/plain') || -1, 10);
+                            const rect = item.getBoundingClientRect();
+                            const isTopHalf = (e.clientY - rect.top) < (rect.height / 2);
+                            let insertIndex = isTopHalf ? targetIndex : targetIndex + 1;
+                            if (src < insertIndex) insertIndex -= 1;
 
-                            if (!isNaN(src) && src >= 0 && src !== targetIndex) {
-                                reorderMusic(src, targetIndex);
+                            if (!isNaN(src) && src >= 0 && src !== insertIndex) {
+                                reorderMusicToIndex(src, insertIndex);
                             }
 
                             _dragSrcIndex = null;
@@ -6211,25 +6349,90 @@
                         // dragend: ドラッグ終了
                         item.addEventListener('dragend', () => {
                             item.classList.remove('dragging');
-                            item.classList.remove('drag-over');
+                            item.classList.remove('drag-over-top');
+                            item.classList.remove('drag-over-bottom');
+                            playlist.querySelectorAll('.playlist-item').forEach(el => {
+                                el.classList.remove('drag-over-top');
+                                el.classList.remove('drag-over-bottom');
+                            });
                             _dragSrcIndex = null;
                         });
 
                         // クリックで再生(ハンドル以外の場所をクリック時)
-                        item.addEventListener('click', (e) => {
-                            if (e.target.classList.contains('drag-handle') || e.target.closest('.drag-handle')) {
-                                return; // ハンドルクリックは無視
+                        item.addEventListener('click', () => {
+                            const idx = parseInt(item.getAttribute('data-index'), 10);
+                            if (playlistSelectMode) {
+                                const next = !selectedMusicItems.has(idx);
+                                togglePlaylistItemSelection(idx, next);
+                                return;
                             }
                             playMusic(idx);
                         });
                     });
                 }
 
-                // 実際の並べ替え処理
-                function reorderMusic(srcIndex, targetIndex) {
-                    if (srcIndex === targetIndex) return;
+                function reorderMusicToIndex(srcIndex, insertIndex) {
+                    if (srcIndex === insertIndex) return;
                     const item = musicFiles.splice(srcIndex, 1)[0];
-                    musicFiles.splice(targetIndex, 0, item);
+                    musicFiles.splice(insertIndex, 0, item);
+                    savePlaylist();
+                    loadPlaylist();
+                }
+
+                function updatePlaylistSelectionUI() {
+                    const batch = document.getElementById('playlistBatchActions');
+                    const btn = document.getElementById('playlistSelectModeBtn');
+                    const count = document.getElementById('playlistSelectedCount');
+                    if (!batch || !btn || !count) return;
+                    batch.classList.toggle('hidden', !playlistSelectMode);
+                    btn.classList.toggle('active', playlistSelectMode);
+                    count.textContent = `${selectedMusicItems.size}${getText('itemsSelected')}`;
+                }
+
+                function togglePlaylistSelectMode() {
+                    playlistSelectMode = !playlistSelectMode;
+                    if (!playlistSelectMode) selectedMusicItems.clear();
+                    loadPlaylist();
+                }
+
+                function togglePlaylistItemSelection(index, checked) {
+                    if (checked) selectedMusicItems.add(index);
+                    else selectedMusicItems.delete(index);
+                    loadPlaylist();
+                }
+
+                function toggleSelectAllPlaylistItems() {
+                    if (!playlistSelectMode) return;
+                    if (selectedMusicItems.size === musicFiles.length) {
+                        selectedMusicItems.clear();
+                    } else {
+                        selectedMusicItems = new Set(musicFiles.map((_, i) => i));
+                    }
+                    loadPlaylist();
+                }
+
+                function deleteSelectedMusic() {
+                    if (!playlistSelectMode || selectedMusicItems.size === 0) return;
+                    const sorted = Array.from(selectedMusicItems).sort((a, b) => b - a);
+                    for (const idx of sorted) {
+                        if (idx < 0 || idx >= musicFiles.length) continue;
+                        const removed = musicFiles[idx];
+                        if (currentMusicIndex === idx) {
+                            const audio = document.getElementById('audioPlayer');
+                            if (audio) {
+                                audio.pause();
+                                audio.src = '';
+                            }
+                            currentMusicIndex = -1;
+                        } else if (currentMusicIndex > idx) {
+                            currentMusicIndex -= 1;
+                        }
+                        if (removed && removed.id != null) {
+                            deleteFileBlobFromDB(removed.id).catch(() => { });
+                        }
+                        musicFiles.splice(idx, 1);
+                    }
+                    selectedMusicItems.clear();
                     savePlaylist();
                     loadPlaylist();
                 }
@@ -6314,7 +6517,7 @@
 
                         currentMusicIndex = index;
                         const playImg = document.getElementById('playIconImg');
-                        if (playImg) { playImg.src = 'pause.webp'; playImg.alt = '一時停止'; }
+                        if (playImg) { playImg.src = 'pause.webp'; playImg.alt = getText('pause'); }
                         loadPlaylist();
                         updateMusicTitleDisplay();
                         updateMediaSession(); // Media Session API更新
@@ -6328,7 +6531,7 @@
                         if (currentMusicIndex >= 0 && musicFiles[currentMusicIndex]) {
                             titleDisplay.textContent = musicFiles[currentMusicIndex].title || 'Unknown track';
                         } else {
-                            titleDisplay.textContent = '楽曲を選択してください';
+                            titleDisplay.textContent = getText('musicSelectPrompt');
                         }
                     }
                 }
@@ -6390,7 +6593,7 @@
                     const playImg = document.getElementById('playIconImg');
                     if (playImg) {
                         playImg.src = isPlaying ? 'pause.webp' : 'play_arrow.webp';
-                        playImg.alt = isPlaying ? '一時停止' : '再生';
+                        playImg.alt = isPlaying ? getText('pause') : getText('play');
                     }
                     // リスト上のplayingクラスは再生中も一時停止中もactiveで良いならそのままだが、
                     // 一時停止中にスタイルを変えたい場合はここで制御。今回は変更なし。
@@ -6451,7 +6654,7 @@
                     const loopImg = document.getElementById('loopBtnImg');
                     if (loopImg) {
                         loopImg.src = isLoop ? 'loop_on.webp' : 'loop_off.webp';
-                        loopImg.alt = isLoop ? 'ループオン' : 'ループオフ';
+                        loopImg.alt = isLoop ? getText('loopOn') : getText('loopOff');
                     }
                 }
 
@@ -6461,7 +6664,7 @@
                     const shImg = document.getElementById('shuffleBtnImg');
                     if (shImg) {
                         shImg.src = isShuffle ? 'shuffle_on.webp' : 'shuffle_off.webp';
-                        shImg.alt = isShuffle ? 'シャッフルオン' : 'シャッフルオフ';
+                        shImg.alt = isShuffle ? getText('shuffleOn') : getText('shuffleOff');
                     }
                 }
 
@@ -6501,13 +6704,13 @@
                 const audioEl = document.getElementById('audioPlayer');
                 audioEl.addEventListener('play', () => {
                     const playImg = document.getElementById('playIconImg');
-                    if (playImg) { playImg.src = 'pause.webp'; playImg.alt = '一時停止'; }
+                    if (playImg) { playImg.src = 'pause.webp'; playImg.alt = getText('pause'); }
                 });
 
                 // 自動的に停止された (バックグラウンドや別アプリの影響) 場合は短時間後に再生を試みる
                 audioEl.addEventListener('pause', () => {
                     const playImg = document.getElementById('playIconImg');
-                    if (playImg) { playImg.src = 'play.webp'; playImg.alt = '再生'; }
+                    if (playImg) { playImg.src = 'play.webp'; playImg.alt = getText('play'); }
 
                     // ユーザーが明示的に一時停止した場合は復帰しない
                     if (userInitiatedPause) return;
@@ -8433,8 +8636,8 @@
                 window.onload = async function () {
 
                     // 言語設定を読み込んで適用
-                    const savedLanguage = getData('app_language') || 'ja';
-                    currentLanguage = savedLanguage;
+                    const savedLanguage = String(getData('app_language') || 'ja').trim().toLowerCase();
+                    currentLanguage = (savedLanguage === 'ja' || savedLanguage === 'en') ? savedLanguage : 'ja';
                     applyTranslations();
                     applyFonts();
 
@@ -8621,11 +8824,11 @@
                         pausedTime = pausedAccum;
                         isPaused = pausedFlag;
                         if (isPaused) {
-                            document.getElementById('pauseBtn').textContent = '再開';
+                            document.getElementById('pauseBtn').textContent = getText('resumeButton');
                             // 表示は一時停止時の時間
                             document.getElementById('timer').textContent = formatTime(pausedTime);
                         } else {
-                            document.getElementById('pauseBtn').textContent = '一時停止';
+                            document.getElementById('pauseBtn').textContent = getText('pauseButton');
                             if (timerInterval) clearInterval(timerInterval);
                             timerInterval = setInterval(updateTimer, 100);
                             updateTimer();
@@ -8674,7 +8877,7 @@
                             toggle.classList.remove('active');
                             toggle.style.opacity = '0.45';
                             toggle.style.pointerEvents = 'none';
-                            toggle.title = 'このブラウザでは自動ミニモード（PiP）は利用できません';
+                            toggle.title = getText('autoPiPUnavailable');
                         }
                         saveData('feature_auto_pip', 'false');
                         saveData('auto_pip_primed', 'false');
@@ -8683,19 +8886,19 @@
                     const loopImg = document.getElementById('loopBtnImg');
                     if (loopImg) {
                         loopImg.src = isLoop ? 'loop_on.webp' : 'loop_off.webp';
-                        loopImg.alt = isLoop ? 'ループオン' : 'ループオフ';
+                        loopImg.alt = isLoop ? getText('loopOn') : getText('loopOff');
                         document.getElementById('loopBtn').style.opacity = isLoop ? '1' : '0.5';
                     }
                     const shImg = document.getElementById('shuffleBtnImg');
                     if (shImg) {
                         shImg.src = isShuffle ? 'shuffle_on.webp' : 'shuffle_off.webp';
-                        shImg.alt = isShuffle ? 'シャッフルオン' : 'シャッフルオフ';
+                        shImg.alt = isShuffle ? getText('shuffleOn') : getText('shuffleOff');
                         document.getElementById('shuffleBtn').style.opacity = isShuffle ? '1' : '0.5';
                     }
                     const playImg = document.getElementById('playIconImg');
                     if (playImg) {
                         playImg.src = 'play.webp';
-                        playImg.alt = '再生';
+                        playImg.alt = getText('play');
                     }
 
                     const audioEl = document.getElementById('audioPlayer');
