@@ -709,6 +709,579 @@
             transition: background-color 0.3s;
         }
 
+        .toggle-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .schedule-edit-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+
+        .light .schedule-edit-btn {
+            color: #666;
+        }
+
+        .dark .schedule-edit-btn {
+            color: #aaa;
+        }
+
+        .schedule-edit-btn:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+            color: currentColor;
+        }
+
+        .dark .schedule-edit-btn:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .schedule-edit-btn:active {
+            transform: scale(0.95);
+        }
+
+        .schedule-edit-btn svg {
+            width: 18px;
+            height: 18px;
+            display: block;
+        }
+
+        /* テーマスケジュール設定スタイル */
+        .theme-schedule-dial-wrap {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 18px;
+        }
+
+        .theme-schedule-dial {
+            width: min(76vw, 360px);
+            height: min(76vw, 360px);
+            touch-action: none;
+            user-select: none;
+        }
+
+        .theme-schedule-ring-base {
+            fill: none;
+            stroke-width: 56;
+        }
+
+        .light .theme-schedule-ring-base {
+            stroke: #111111;
+        }
+
+        .dark .theme-schedule-ring-base {
+            stroke: #050505;
+        }
+
+        .theme-schedule-dial-core {
+            stroke: rgba(255, 255, 255, 0.08);
+            stroke-width: 2;
+        }
+
+        .light .theme-schedule-dial-core {
+            fill: #f3f5f8;
+        }
+
+        .dark .theme-schedule-dial-core {
+            fill: #2b2d34;
+        }
+
+        .theme-schedule-tick {
+            stroke: rgba(255, 255, 255, 0.25);
+            stroke-width: 2;
+            stroke-linecap: round;
+        }
+
+        .theme-schedule-tick.major {
+            stroke: rgba(255, 255, 255, 0.5);
+            stroke-width: 2.4;
+        }
+
+        .light .theme-schedule-tick {
+            stroke: rgba(30, 30, 30, 0.25);
+        }
+
+        .light .theme-schedule-tick.major {
+            stroke: rgba(30, 30, 30, 0.45);
+        }
+
+        .theme-schedule-label {
+            font-size: 9px;
+            font-weight: 600;
+            text-anchor: middle;
+            dominant-baseline: middle;
+            letter-spacing: 0.3px;
+        }
+
+        .light .theme-schedule-label {
+            fill: rgba(30, 30, 30, 0.75);
+        }
+
+        .dark .theme-schedule-label {
+            fill: rgba(255, 255, 255, 0.72);
+        }
+
+        .theme-schedule-segment {
+            fill: none;
+            stroke: var(--primary-color);
+            stroke-width: 28;
+            stroke-linecap: round;
+            cursor: pointer;
+            transition: stroke-width 0.18s ease, filter 0.18s ease;
+        }
+
+        .theme-schedule-segment.selected {
+            stroke-width: 30;
+        }
+
+        .theme-schedule-handle {
+            fill: var(--primary-color);
+            stroke: #1f1f1f;
+            stroke-width: 2;
+            cursor: grab;
+        }
+
+        .theme-schedule-handle:active {
+            cursor: grabbing;
+        }
+
+        .theme-schedule-icon {
+            fill: #ffcf00;
+        }
+
+        .theme-schedule-icon-night {
+            fill: #6f83ff;
+        }
+
+        .theme-schedule-editor {
+            border-radius: 16px;
+            padding: 14px;
+            margin-bottom: 14px;
+            text-align: left;
+        }
+
+        .light .theme-schedule-editor {
+            background: rgba(255, 255, 255, 0.78);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+        }
+
+        .dark .theme-schedule-editor {
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .theme-schedule-editor h4 {
+            margin: 0 0 10px;
+            font-size: 0.95rem;
+            letter-spacing: 0.2px;
+        }
+
+        .theme-schedule-time-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .theme-schedule-time-row input[type="time"] {
+            width: 100%;
+            border-radius: 12px;
+            border: 1px solid rgba(0, 0, 0, 0.12);
+            padding: 10px;
+            font-size: 0.92rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .dark .theme-schedule-time-row input[type="time"] {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.15);
+            color: #efefef;
+        }
+
+        .theme-schedule-mode-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .theme-schedule-mode-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            border-radius: 12px;
+            border: 1px solid transparent;
+            padding: 10px 8px;
+            cursor: pointer;
+            background: transparent;
+            color: inherit;
+            font-size: 0.9rem;
+        }
+
+        .theme-schedule-mode-btn.active {
+            border-color: var(--primary-color);
+        }
+
+        .theme-schedule-delete {
+            width: 100%;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 80, 80, 0.35);
+            color: #ff5f5f;
+            background: transparent;
+            padding: 10px;
+            cursor: pointer;
+            font-size: 0.88rem;
+        }
+
+        /* Theme Schedule Dialog - Modern iOS-like Design */
+        .theme-schedule-dialog {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: min(90vw, 600px);
+            max-height: 85vh;
+            border-radius: 28px;
+            padding: 28px;
+            z-index: 10000;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            animation: slideUpCentered 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .light .theme-schedule-dialog {
+            background: linear-gradient(135deg, #f5f7fa 0%, #ffffff 100%);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        }
+
+        .dark .theme-schedule-dialog {
+            background: linear-gradient(135deg, #1a1a1a 0%, #242424 100%);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .theme-schedule-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .theme-schedule-title {
+            margin: 0;
+            font-size: 1.4rem;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        .theme-schedule-close-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+            color: inherit;
+        }
+
+        .light .theme-schedule-close-btn {
+            color: #666;
+        }
+
+        .dark .theme-schedule-close-btn {
+            color: #aaa;
+        }
+
+        .theme-schedule-close-btn:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .dark .theme-schedule-close-btn:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .theme-schedule-subtitle {
+            font-size: 0.95rem;
+            opacity: 0.7;
+            margin-bottom: 12px;
+            line-height: 1.5;
+        }
+
+        .theme-schedule-add-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 14px 20px;
+            border: 2px solid currentColor;
+            border-radius: 16px;
+            background: none;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            margin-bottom: 20px;
+        }
+
+        .light .theme-schedule-add-btn {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .dark .theme-schedule-add-btn {
+            color: var(--primary-color-dark);
+            border-color: var(--primary-color-dark);
+        }
+
+        .theme-schedule-add-btn:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .dark .theme-schedule-add-btn:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .theme-schedule-add-btn:active {
+            transform: scale(0.98);
+        }
+
+        .theme-schedule-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .theme-schedule-buttons button {
+            flex: 1;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 16px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .light .theme-schedule-buttons .secondary {
+            background-color: var(--panel-light);
+            color: #323232;
+        }
+
+        .dark .theme-schedule-buttons .secondary {
+            background-color: var(--panel-dark);
+            color: #e8e8e8;
+        }
+
+        .theme-schedule-buttons .secondary:hover {
+            opacity: 0.8;
+        }
+
+        .light .theme-schedule-buttons .primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .dark .theme-schedule-buttons .primary {
+            background-color: var(--primary-color-dark);
+            color: white;
+        }
+
+        .theme-schedule-buttons .primary:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        .theme-schedule-buttons .primary:active {
+            transform: translateY(0);
+        }
+
+        @media (max-width: 768px) {
+            .theme-schedule-dialog {
+                width: min(95vw, 550px);
+                max-height: 90vh;
+                padding: 20px;
+                border-radius: 24px;
+            }
+
+            .theme-schedule-title {
+                font-size: 1.2rem;
+            }
+
+            .theme-schedule-subtitle {
+                font-size: 0.9rem;
+                margin-bottom: 16px;
+            }
+
+            .theme-schedule-dial {
+                width: min(80vw, 320px);
+                height: min(80vw, 320px);
+            }
+
+            .theme-schedule-time-row {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .theme-schedule-time-row input[type="time"] {
+                padding: 12px;
+                font-size: 1rem;
+            }
+
+            .theme-schedule-mode-row {
+                grid-template-columns: 1fr;
+                gap: 10px;
+                margin-bottom: 12px;
+            }
+
+            .theme-schedule-mode-btn {
+                padding: 12px 10px;
+                font-size: 0.95rem;
+            }
+
+            .theme-schedule-mode-btn svg {
+                width: 18px;
+                height: 18px;
+            }
+
+            .theme-schedule-delete {
+                padding: 12px;
+                font-size: 0.95rem;
+            }
+
+            .theme-schedule-add-btn {
+                padding: 12px 16px;
+                font-size: 0.9rem;
+            }
+
+            .theme-schedule-buttons {
+                gap: 10px;
+            }
+
+            .theme-schedule-buttons button {
+                padding: 12px 16px;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 520px) {
+            .theme-schedule-dialog {
+                width: min(98vw, 500px);
+                max-height: 92vh;
+                padding: 16px;
+                border-radius: 20px;
+            }
+
+            .theme-schedule-header {
+                margin-bottom: 12px;
+            }
+
+            .theme-schedule-title {
+                font-size: 1.1rem;
+            }
+
+            .theme-schedule-subtitle {
+                font-size: 0.85rem;
+                margin-bottom: 12px;
+            }
+
+            .theme-schedule-dial-wrap {
+                margin-bottom: 16px;
+            }
+
+            .theme-schedule-dial {
+                width: min(75vw, 280px);
+                height: min(75vw, 280px);
+            }
+
+            .theme-schedule-editor {
+                padding: 12px;
+                margin-bottom: 12px;
+                border-radius: 12px;
+            }
+
+            .theme-schedule-editor h4 {
+                margin: 0 0 8px;
+                font-size: 0.9rem;
+            }
+
+            .theme-schedule-time-row {
+                grid-template-columns: 1fr;
+                gap: 8px;
+                margin-bottom: 10px;
+            }
+
+            .theme-schedule-time-row input[type="time"] {
+                padding: 10px;
+                font-size: 16px;
+                border-radius: 10px;
+            }
+
+            .theme-schedule-mode-row {
+                grid-template-columns: 1fr;
+                gap: 8px;
+                margin-bottom: 10px;
+            }
+
+            .theme-schedule-mode-btn {
+                padding: 10px 8px;
+                font-size: 0.85rem;
+                border-radius: 10px;
+                gap: 6px;
+            }
+
+            .theme-schedule-mode-btn svg {
+                width: 14px;
+                height: 14px;
+                min-width: 14px;
+            }
+
+            .theme-schedule-mode-btn span {
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            .theme-schedule-delete {
+                padding: 10px;
+                font-size: 0.85rem;
+                border-radius: 10px;
+            }
+
+            .theme-schedule-add-btn {
+                padding: 10px 14px;
+                font-size: 0.85rem;
+                margin-bottom: 16px;
+                border-radius: 12px;
+            }
+
+            .theme-schedule-add-btn svg {
+                width: 18px;
+                height: 18px;
+            }
+
+            .theme-schedule-buttons {
+                gap: 8px;
+            }
+
+            .theme-schedule-buttons button {
+                padding: 10px 12px;
+                font-size: 0.85rem;
+                border-radius: 12px;
+            }
+        }
+
         .toggle-switch.active {
             background-color: var(--primary-color);
         }
@@ -1152,6 +1725,39 @@
             opacity: 0.85;
         }
 
+        .playlist-title-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            min-width: 0;
+        }
+
+        .playlist-manager-btn {
+            border: none;
+            background: transparent;
+            width: 28px;
+            height: 28px;
+            border-radius: 24px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+        }
+
+        .playlist-manager-btn img {
+            width: 16px;
+            height: 16px;
+            opacity: 0.75;
+        }
+
+        .playlist-manager-btn:hover {
+            background: rgba(0, 0, 0, 0.04);
+        }
+
+        .dark .playlist-manager-btn:hover {
+            background: rgba(255, 255, 255, 0.06);
+        }
+
         .playlist-count {
             font-size: 0.8rem;
             opacity: 0.6;
@@ -1410,6 +2016,16 @@
             display: flex;
             align-items: center;
             justify-content: center;
+        }
+
+        #playlistManagerOverlay {
+            z-index: 9999;
+        }
+
+        #customConfirmOverlay,
+        #renameOverlay,
+        #playlistRenameOverlay {
+            z-index: 10020;
         }
 
         @keyframes fadeIn {
@@ -2477,7 +3093,10 @@
             cursor: grab;
             user-select: none;
             opacity: 0.8;
-            margin-right: 8px;
+            margin-right: 4px;
+            width: 20px;
+            height: 20px;
+            touch-action: none;
         }
 
         .drag-handle:active {
@@ -2525,7 +3144,95 @@
             right: 8px;
             height: 3px;
             border-radius: 24px;
-            background: #2196F3;
+            background: var(--primary-color);
+        }
+
+        .dark .playlist-item.drag-over-top::before,
+        .dark .playlist-item.drag-over-bottom::after {
+            background: var(--primary-color-dark);
+        }
+
+        .playlist-manager-add-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .playlist-manager-add-row input {
+            flex: 1;
+            min-width: 0;
+            padding: 10px 12px;
+            border: none;
+            border-radius: 24px;
+            font-size: 0.9rem;
+        }
+
+        .light .playlist-manager-add-row input {
+            background: var(--panel-light);
+            color: #323232;
+        }
+
+        .dark .playlist-manager-add-row input {
+            background: var(--panel-dark);
+            color: #e8e8e8;
+        }
+
+        .playlist-manager-add-row button {
+            padding: 10px 14px;
+            font-size: 0.85rem;
+        }
+
+        .playlist-manager-list {
+            max-height: 280px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+
+        .playlist-manager-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 10px;
+            border-radius: 24px;
+            background: rgba(0, 0, 0, 0.03);
+        }
+
+        .dark .playlist-manager-item {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .playlist-manager-item.active {
+            outline: 2px solid rgba(0, 0, 0, 0.15);
+        }
+
+        .dark .playlist-manager-item.active {
+            outline: 2px solid rgba(255, 255, 255, 0.18);
+        }
+
+        .playlist-manager-item-name {
+            flex: 1;
+            min-width: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .playlist-manager-item-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .playlist-manager-item-actions .secondary,
+        .playlist-manager-item-actions .delete-btn {
+            padding: 5px 10px !important;
+            font-size: 0.74rem !important;
+            line-height: 1.2;
+            min-height: auto;
         }
 
         .playlist-item.drag-over-top::before {
@@ -3566,6 +4273,32 @@
         </div>
     </div>
 
+    <div class="custom-confirm-overlay" id="playlistRenameOverlay">
+        <div class="custom-confirm-dialog">
+            <div class="custom-confirm-title" data-i18n="renamePlaylist">プレイリスト名を変更</div>
+            <input type="text" id="playlistRenameInput" placeholder="プレイリスト名を入力" data-i18n="playlistNamePlaceholder"
+                style="width:100%; padding:12px 15px; border:none; border-radius:24px; font-size:0.95rem; font-family:inherit; margin-bottom:20px;">
+            <div class="custom-confirm-buttons">
+                <button class="custom-confirm-cancel" id="playlistRenameCancelBtn" data-i18n="cancelButton">キャンセル</button>
+                <button class="custom-confirm-ok" id="playlistRenameOkBtn" data-i18n="saveButton">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="custom-confirm-overlay" id="playlistManagerOverlay">
+        <div class="custom-confirm-dialog" style="max-width: 520px; width: min(92vw, 520px);">
+            <div class="custom-confirm-title" data-i18n="playlistManagerTitle">プレイリスト管理</div>
+            <div class="playlist-manager-add-row">
+                <input type="text" id="newPlaylistNameInput" data-i18n="newPlaylistPlaceholder" placeholder="新しいプレイリスト名">
+                <button class="primary" id="addPlaylistBtn" onclick="addNewPlaylist()" data-i18n="addButton">追加</button>
+            </div>
+            <div id="playlistManagerList" class="playlist-manager-list"></div>
+            <div class="custom-confirm-buttons">
+                <button class="custom-confirm-ok" onclick="closePlaylistManager()" data-i18n="closeButton">閉じる</button>
+            </div>
+        </div>
+    </div>
+
     <!-- ToDo Ver.2 ポップアップ -->
     <div class="todo-v2-popup-overlay" id="todoV2PopupOverlay">
         <div class="todo-v2-popup">
@@ -3588,6 +4321,41 @@
     <!-- デイトピッカー用オーバーレイ -->
     <div class="date-picker-overlay" id="datePickerOverlay" onclick="closeAllDatePickers()"></div>
     <div class="date-picker-dropdown" id="commonDatePicker"></div>
+
+    <!-- テーマスケジュール管理ポップアップ -->
+    <div class="custom-confirm-overlay" id="themeScheduleOverlay">
+        <div class="theme-schedule-dialog">
+            <div class="theme-schedule-header">
+                <h3 class="theme-schedule-title" data-i18n="themeScheduleTitle">テーマスケジュール設定</h3>
+                <button class="theme-schedule-close-btn" onclick="closeThemeScheduleManager()" aria-label="閉じる">  
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="theme-schedule-subtitle" data-i18n="themeScheduleSubtitle">
+                時間帯ごとにダークモード/ライトモードを自動切り替え
+            </div>
+            <div class="theme-schedule-dial-wrap">
+                <svg id="themeScheduleDial" class="theme-schedule-dial" viewBox="0 0 360 360" aria-label="テーマスケジュールダイヤル"></svg>
+            </div>
+            <div id="themeScheduleEditor" class="theme-schedule-editor">
+                <!-- セグメント選択時の編集UIがここに挿入される -->
+            </div>
+            <button class="theme-schedule-add-btn" id="addThemeScheduleBtn" onclick="addThemeScheduleRow()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                <span data-i18n="themeScheduleAdd">追加</span>
+            </button>
+            <div class="theme-schedule-buttons">
+                <button class="secondary" onclick="closeThemeScheduleManager()" data-i18n="cancelButton">キャンセル</button>
+                <button class="primary" onclick="saveThemeSchedule()" data-i18n="saveButton">保存する</button>
+            </div>
+        </div>
+    </div>
     <div class="calendar-day-dialog-overlay" id="calendarDayDialog">
         <div class="calendar-day-dialog">
             <div class="calendar-day-dialog-header">
@@ -3816,7 +4584,12 @@
 
                 <div class="playlist-section">
                     <div class="playlist-header">
-                        <h3 data-i18n="playlist">プレイリスト</h3>
+                        <div class="playlist-title-row">
+                            <h3 id="playlistTitle">プレイリスト</h3>
+                            <button class="playlist-manager-btn" id="playlistManagerBtn" onclick="openPlaylistManager()" aria-label="プレイリスト管理" data-i18n-aria="playlistManagerTitle">
+                                <img src="arrow_down.webp" alt="メニュー" data-i18n-alt="menu">
+                            </button>
+                        </div>
                         <div class="playlist-header-actions">
                             <span class="playlist-count" id="playlistCount">0</span>
                             <button id="playlistSelectModeBtn" class="secondary playlist-select-toggle" onclick="togglePlaylistSelectMode()" data-i18n="playlistSelectMode">選択</button>
@@ -3979,6 +4752,20 @@
                     <span data-i18n="musicResumeOnTapAfterReload">更新後に画面タップで音楽を自動再開</span>
                     <div class="toggle-switch" id="toggleMusicResumeOnTap" onclick="toggleMusicResumeOnTap()">
                         <div class="toggle-slider"></div>
+                    </div>
+                </div>
+                <div class="toggle-item">
+                    <span>時間によってテーマを変更</span>
+                    <div class="toggle-controls">
+                        <button class="schedule-edit-btn" id="themeScheduleEditBtn" style="display: none;" onclick="openThemeScheduleManager()" aria-label="テーマスケジュール編集">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                            </svg>
+                        </button>
+                        <div class="toggle-switch" id="toggleThemeSchedule" onclick="toggleThemeSchedule()">
+                            <div class="toggle-slider"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -4377,8 +5164,12 @@
                 let allHistoryItems = [];
                 let currentMusicIndex = -1;
                 let musicFiles = [];
+                let musicPlaylists = [];
+                let currentPlaylistId = 'default';
+                let _renamingPlaylistId = null;
                 let playlistSelectMode = false;
                 let selectedMusicItems = new Set();
+                let _touchDragState = null;
                 let isLoop = false;
                 let isShuffle = false;
                 let _musicDB = null;
@@ -4615,6 +5406,10 @@
                         tutorialCompleteMessage: 'お疲れ様でした!これで基本的な使い方の説明は終了です。また分からなくなったら、設定画面の「使い方ガイドを再表示」からいつでも確認できます。',
                         // アクセシビリティ用ラベル
                         dragHandle: '並べ替えハンドル',
+                        playlistManagerTitle: 'プレイリスト管理',
+                        newPlaylistPlaceholder: '新しいプレイリスト名',
+                        renamePlaylist: 'プレイリスト名を変更',
+                        playlistNamePlaceholder: 'プレイリスト名を入力',
 
                         // チュートリアル
                         tutorialStartTitle: 'ストップウォッチの開始',
@@ -4759,6 +5554,17 @@
                         tutorialStep8Desc: 'このボタンでダークモードとライトモードを切り替えられます。',
                         toggleLightMode: 'ライトモードに切り替え',
                         toggleDarkMode: 'ダークモードに切り替え',
+
+                        // テーマスケジューラー
+                        themeScheduleTitle: 'テーマスケジュール設定',
+                        themeScheduleSubtitle: '時間帯ごとにダークモード/ライトモードを自動切り替え',
+                        themeScheduleSelectTime: '選択中の時間帯',
+                        darkMode: 'ダークモード',
+                        lightMode: 'ライトモード',
+                        deleteTimeRange: 'この時間帯を削除',
+                        selectSegment: 'セグメントを選択すると編集できます',
+                        themeScheduleAdd: '追加',
+                        theme: 'テーマ',
                     },
                     en: {
                         // Font Settings
@@ -4945,6 +5751,10 @@
                         tutorialCompleteMessage: 'Great job! You\'ve completed the basic tutorial. If you need help again, you can access the guide anytime from "Show User Guide" in the settings.',
                         // Accessibility labels
                         dragHandle: 'Drag handle',
+                        playlistManagerTitle: 'Playlist manager',
+                        newPlaylistPlaceholder: 'New playlist name',
+                        renamePlaylist: 'Rename playlist',
+                        playlistNamePlaceholder: 'Enter playlist name',
                         copyright: '© 高級ジェネ™ All rights reserved.',
                         // Date format
                         year: '/',
@@ -5128,6 +5938,17 @@
                         settingsAlt: 'Settings',
                         toggleLightMode: 'Switch to light mode',
                         toggleDarkMode: 'Switch to dark mode',
+
+                        // Theme Schedule
+                        themeScheduleTitle: 'Theme Schedule Settings',
+                        themeScheduleSubtitle: 'Automatically switch between dark/light modes by time',
+                        themeScheduleSelectTime: 'Selected Time Range',
+                        darkMode: 'Dark Mode',
+                        lightMode: 'Light Mode',
+                        deleteTimeRange: 'Delete this time range',
+                        selectSegment: 'Select a segment to edit',
+                        themeScheduleAdd: 'Add',
+                        theme: 'Theme',
                     }
                 };
 
@@ -5230,6 +6051,11 @@
 
                     // HTML lang属性を更新
                     document.documentElement.lang = currentLanguage;
+
+                    // プレイリスト見出しは選択中プレイリスト名を優先表示
+                    if (typeof updatePlaylistTitle === 'function') {
+                        updatePlaylistTitle();
+                    }
                 }
 
                 // カスタム確認ダイアログ
@@ -5286,6 +6112,13 @@
                             confirmResolve(false);
                             confirmResolve = null;
                         }
+                    }
+                });
+
+                // テーマスケジュール管理オーバーレイのイベントリスナー
+                document.getElementById('themeScheduleOverlay')?.addEventListener('click', (e) => {
+                    if (e.target === e.currentTarget) {
+                        closeThemeScheduleManager();
                     }
                 });
 
@@ -5813,6 +6646,451 @@
                     }
                 }
 
+                // テーマスケジュール関連の関数
+                let themeScheduleData = [];
+                let selectedThemeScheduleIndex = -1;
+                let themeScheduleDragState = null;
+                let themeScheduleCheckInterval = null;
+
+                function themeTimeToMinutes(timeStr) {
+                    const parts = String(timeStr || '').split(':');
+                    const h = Math.max(0, Math.min(23, parseInt(parts[0], 10) || 0));
+                    const m = Math.max(0, Math.min(59, parseInt(parts[1], 10) || 0));
+                    return h * 60 + m;
+                }
+
+                function themeMinutesToTime(minutes) {
+                    const normalized = ((Math.round(minutes) % 1440) + 1440) % 1440;
+                    const h = Math.floor(normalized / 60);
+                    const m = normalized % 60;
+                    return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+                }
+
+                function normalizeThemeScheduleEntry(raw) {
+                    const from = themeMinutesToTime(themeTimeToMinutes(raw?.timeFrom || '22:00'));
+                    let to = themeMinutesToTime(themeTimeToMinutes(raw?.timeTo || '07:00'));
+                    if (from === to) {
+                        to = themeMinutesToTime(themeTimeToMinutes(to) + 60);
+                    }
+                    const mode = raw?.mode === 'dark' ? 'dark' : 'light';
+                    return { timeFrom: from, timeTo: to, mode };
+                }
+
+                function loadThemeSchedule() {
+                    try {
+                        const data = getData('theme_schedule');
+                        const parsed = data ? JSON.parse(data) : [];
+                        if (Array.isArray(parsed)) {
+                            themeScheduleData = parsed.map(normalizeThemeScheduleEntry);
+                        } else {
+                            themeScheduleData = [];
+                        }
+                    } catch (e) {
+                        console.error('Failed to load theme schedule:', e);
+                        themeScheduleData = [];
+                    }
+                    if (selectedThemeScheduleIndex >= themeScheduleData.length) {
+                        selectedThemeScheduleIndex = themeScheduleData.length - 1;
+                    }
+                }
+
+                function saveThemeScheduleToStorage() {
+                    try {
+                        saveData('theme_schedule', JSON.stringify(themeScheduleData.map(normalizeThemeScheduleEntry)));
+                    } catch (e) {
+                        console.error('Failed to save theme schedule:', e);
+                    }
+                }
+
+                function toggleThemeSchedule() {
+                    const toggle = document.getElementById('toggleThemeSchedule');
+                    const editBtn = document.getElementById('themeScheduleEditBtn');
+                    const isActive = toggle.classList.contains('active');
+
+                    if (isActive) {
+                        toggle.classList.remove('active');
+                        editBtn.style.display = 'none';
+                        saveData('theme_schedule_enabled', 'false');
+                        stopThemeScheduleCheck();
+                    } else {
+                        toggle.classList.add('active');
+                        editBtn.style.display = 'inline-flex';
+                        saveData('theme_schedule_enabled', 'true');
+                        startThemeScheduleCheck();
+                    }
+                }
+
+                function openThemeScheduleManager() {
+                    loadThemeSchedule();
+                    if (themeScheduleData.length === 0) {
+                        themeScheduleData.push({ timeFrom: '22:00', timeTo: '07:00', mode: 'dark' });
+                        selectedThemeScheduleIndex = 0;
+                    } else if (selectedThemeScheduleIndex < 0) {
+                        selectedThemeScheduleIndex = 0;
+                    }
+
+                    renderThemeScheduleDial();
+                    renderThemeScheduleEditor();
+
+                    const overlay = document.getElementById('themeScheduleOverlay');
+                    if (overlay) {
+                        overlay.classList.add('show');
+                        overlay.setAttribute('aria-hidden', 'false');
+                    }
+                }
+
+                function closeThemeScheduleManager() {
+                    stopThemeScheduleDrag();
+                    const overlay = document.getElementById('themeScheduleOverlay');
+                    if (overlay) {
+                        overlay.classList.remove('show');
+                        overlay.setAttribute('aria-hidden', 'true');
+                    }
+                }
+
+                function themeMinutesToAngle(minutes) {
+                    return ((minutes / 1440) * 360) - 90;
+                }
+
+                function themePolarPoint(cx, cy, r, angleDeg) {
+                    const rad = (angleDeg * Math.PI) / 180;
+                    return {
+                        x: cx + r * Math.cos(rad),
+                        y: cy + r * Math.sin(rad)
+                    };
+                }
+
+                function themeArcPath(cx, cy, r, startMinutes, endMinutes) {
+                    let start = ((startMinutes % 1440) + 1440) % 1440;
+                    let end = ((endMinutes % 1440) + 1440) % 1440;
+                    if (end <= start) end += 1440;
+                    const span = end - start;
+                    if (span >= 1439) {
+                        return '';
+                    }
+
+                    const startAngle = themeMinutesToAngle(start);
+                    const endAngle = themeMinutesToAngle(end);
+                    const p1 = themePolarPoint(cx, cy, r, startAngle);
+                    const p2 = themePolarPoint(cx, cy, r, endAngle);
+                    const largeArc = span > 720 ? 1 : 0;
+                    return `M ${p1.x.toFixed(2)} ${p1.y.toFixed(2)} A ${r} ${r} 0 ${largeArc} 1 ${p2.x.toFixed(2)} ${p2.y.toFixed(2)}`;
+                }
+
+                function themeSegmentParts(startMinutes, endMinutes) {
+                    const start = ((startMinutes % 1440) + 1440) % 1440;
+                    const end = ((endMinutes % 1440) + 1440) % 1440;
+                    if (start < end) return [[start, end]];
+                    if (start > end) return [[start, 1440], [0, end]];
+                    return [[start, start + 1439]];
+                }
+
+                function renderThemeScheduleDial() {
+                    const svg = document.getElementById('themeScheduleDial');
+                    if (!svg) return;
+
+                    const cx = 180;
+                    const cy = 180;
+                    const ringR = 132;
+                    const coreR = 102;
+
+                    let html = '';
+                    html += `<circle class="theme-schedule-ring-base" cx="${cx}" cy="${cy}" r="${ringR}"></circle>`;
+                    html += `<circle class="theme-schedule-dial-core" cx="${cx}" cy="${cy}" r="${coreR}"></circle>`;
+
+                    for (let i = 0; i < 96; i++) {
+                        const minutes = i * 15;
+                        const angle = themeMinutesToAngle(minutes);
+                        const isMajor = i % 8 === 0;
+                        const p1 = themePolarPoint(cx, cy, isMajor ? 118 : 121, angle);
+                        const p2 = themePolarPoint(cx, cy, isMajor ? 126 : 124, angle);
+                        html += `<line class="theme-schedule-tick${isMajor ? ' major' : ''}" x1="${p1.x.toFixed(2)}" y1="${p1.y.toFixed(2)}" x2="${p2.x.toFixed(2)}" y2="${p2.y.toFixed(2)}"></line>`;
+                    }
+
+                    for (let h = 0; h < 24; h += 2) {
+                        const angle = themeMinutesToAngle(h * 60);
+                        const lp = themePolarPoint(cx, cy, 92, angle);
+                        html += `<text class="theme-schedule-label" x="${lp.x.toFixed(2)}" y="${lp.y.toFixed(2)}">${h}</text>`;
+                    }
+
+                    html += `<circle class="theme-schedule-icon-night" cx="180" cy="130" r="10"></circle>`;
+                    html += `<circle cx="186" cy="125" r="9" fill="var(--panel-dark)"></circle>`;
+                    html += `<circle class="theme-schedule-icon" cx="180" cy="231" r="8"></circle>`;
+                    html += `<circle cx="180" cy="231" r="14" fill="none" stroke="rgba(255,207,0,0.32)" stroke-width="2"></circle>`;
+
+                    themeScheduleData.forEach((schedule, index) => {
+                        const isSelected = index === selectedThemeScheduleIndex;
+                        const startMinutes = themeTimeToMinutes(schedule.timeFrom);
+                        const endMinutes = themeTimeToMinutes(schedule.timeTo);
+                        const parts = themeSegmentParts(startMinutes, endMinutes);
+
+                        parts.forEach((part) => {
+                            const d = themeArcPath(cx, cy, ringR, part[0], part[1]);
+                            if (!d) {
+                                html += `<circle class="theme-schedule-segment ${isSelected ? 'selected' : ''}" cx="${cx}" cy="${cy}" r="${ringR}" data-index="${index}" onclick="selectThemeSchedule(${index})"></circle>`;
+                            } else {
+                                html += `<path class="theme-schedule-segment ${isSelected ? 'selected' : ''}" d="${d}" data-index="${index}" onclick="selectThemeSchedule(${index})"></path>`;
+                            }
+                        });
+
+                        const startPoint = themePolarPoint(cx, cy, ringR, themeMinutesToAngle(startMinutes));
+                        const endPoint = themePolarPoint(cx, cy, ringR, themeMinutesToAngle(endMinutes));
+
+                        html += `<circle class="theme-schedule-handle" cx="${startPoint.x.toFixed(2)}" cy="${startPoint.y.toFixed(2)}" r="${isSelected ? '7' : '5'}" onpointerdown="startThemeScheduleHandleDrag(event, ${index}, 'start')"></circle>`;
+                        html += `<circle class="theme-schedule-handle" cx="${endPoint.x.toFixed(2)}" cy="${endPoint.y.toFixed(2)}" r="${isSelected ? '7' : '5'}" onpointerdown="startThemeScheduleHandleDrag(event, ${index}, 'end')"></circle>`;
+                    });
+
+                    svg.innerHTML = html;
+                    updateThemeScheduleShadow();
+                }
+
+                function renderThemeScheduleEditor() {
+                    const box = document.getElementById('themeScheduleEditor');
+                    if (!box) return;
+
+                    if (selectedThemeScheduleIndex < 0 || !themeScheduleData[selectedThemeScheduleIndex]) {
+                        const selectSegmentText = translations[currentLanguage]['selectSegment'] || 'セグメントを選択すると編集できます';
+                        box.innerHTML = `<h4>${selectSegmentText}</h4>`;
+                        return;
+                    }
+
+                    const schedule = themeScheduleData[selectedThemeScheduleIndex];
+                    const selectTimeText = translations[currentLanguage]['themeScheduleSelectTime'] || '選択中の時間帯';
+                    const darkModeText = translations[currentLanguage]['darkMode'] || 'ダークモード';
+                    const lightModeText = translations[currentLanguage]['lightMode'] || 'ライトモード';
+                    const deleteText = translations[currentLanguage]['deleteTimeRange'] || 'この時間帯を削除';
+
+                    box.innerHTML = `
+                        <h4>${selectTimeText}</h4>
+                        <div class="theme-schedule-time-row">
+                            <input type="time" value="${schedule.timeFrom}" onchange="updateSelectedThemeSchedule('timeFrom', this.value)">
+                            <input type="time" value="${schedule.timeTo}" onchange="updateSelectedThemeSchedule('timeTo', this.value)">
+                        </div>
+                        <div class="theme-schedule-mode-row">
+                            <button class="theme-schedule-mode-btn ${schedule.mode === 'dark' ? 'active' : ''}" onclick="setSelectedThemeScheduleMode('dark')">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                                <span>${darkModeText}</span>
+                            </button>
+                            <button class="theme-schedule-mode-btn ${schedule.mode === 'light' ? 'active' : ''}" onclick="setSelectedThemeScheduleMode('light')">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"></circle><line x1="12" y1="2" x2="12" y2="5"></line><line x1="12" y1="19" x2="12" y2="22"></line><line x1="2" y1="12" x2="5" y2="12"></line><line x1="19" y1="12" x2="22" y2="12"></line></svg>
+                                <span>${lightModeText}</span>
+                            </button>
+                        </div>
+                        <button class="theme-schedule-delete" onclick="removeThemeSchedule(${selectedThemeScheduleIndex})">${deleteText}</button>
+                    `;
+
+                    // Update mode button box-shadow with current primary color
+                    setTimeout(() => {
+                        const primaryColor = getComputedStyle(document.documentElement)
+                            .getPropertyValue('--primary-color')
+                            .trim();
+                        const modeButtons = document.querySelectorAll('.theme-schedule-mode-btn.active');
+                        modeButtons.forEach(btn => {
+                            btn.style.boxShadow = `inset 0 0 0 1px ${primaryColor}59`;
+                        });
+                    }, 0);
+                }
+
+                function selectThemeSchedule(index) {
+                    selectedThemeScheduleIndex = index;
+                    renderThemeScheduleDial();
+                    renderThemeScheduleEditor();
+                    updateThemeScheduleShadow();
+                }
+
+                function updateThemeScheduleShadow() {
+                    // 現在のテーマカラーを取得
+                    const primaryColor = getComputedStyle(document.documentElement)
+                        .getPropertyValue('--primary-color')
+                        .trim();
+                    
+                    // すべてのセグメント要素を取得
+                    const segments = document.querySelectorAll('.theme-schedule-segment');
+                    segments.forEach((seg, index) => {
+                        if (index === selectedThemeScheduleIndex) {
+                            // 選択中のセグメントはシャドウを更新
+                            seg.style.filter = `drop-shadow(0 0 8px ${primaryColor}40)`;
+                        } else {
+                            // 非選択は元に戻す
+                            seg.style.filter = 'none';
+                        }
+                    });
+                }
+
+                function addThemeScheduleRow() {
+                    const baseStart = (themeScheduleData.length * 180) % 1440;
+                    const start = themeMinutesToTime(baseStart);
+                    const end = themeMinutesToTime(baseStart + 240);
+                    themeScheduleData.push({ timeFrom: start, timeTo: end, mode: 'light' });
+                    selectedThemeScheduleIndex = themeScheduleData.length - 1;
+                    renderThemeScheduleDial();
+                    renderThemeScheduleEditor();
+                }
+
+                function updateSelectedThemeSchedule(field, value) {
+                    if (selectedThemeScheduleIndex < 0 || !themeScheduleData[selectedThemeScheduleIndex]) return;
+                    if (field === 'timeFrom' || field === 'timeTo') {
+                        themeScheduleData[selectedThemeScheduleIndex][field] = themeMinutesToTime(themeTimeToMinutes(value));
+                        const item = themeScheduleData[selectedThemeScheduleIndex];
+                        if (item.timeFrom === item.timeTo) {
+                            item.timeTo = themeMinutesToTime(themeTimeToMinutes(item.timeTo) + 60);
+                        }
+                    }
+                    renderThemeScheduleDial();
+                    renderThemeScheduleEditor();
+                }
+
+                function setSelectedThemeScheduleMode(mode) {
+                    if (selectedThemeScheduleIndex < 0 || !themeScheduleData[selectedThemeScheduleIndex]) return;
+                    themeScheduleData[selectedThemeScheduleIndex].mode = mode === 'dark' ? 'dark' : 'light';
+                    renderThemeScheduleEditor();
+                }
+
+                function removeThemeSchedule(index) {
+                    if (index < 0 || index >= themeScheduleData.length) return;
+                    themeScheduleData.splice(index, 1);
+                    if (themeScheduleData.length === 0) {
+                        selectedThemeScheduleIndex = -1;
+                    } else {
+                        selectedThemeScheduleIndex = Math.min(index, themeScheduleData.length - 1);
+                    }
+                    renderThemeScheduleDial();
+                    renderThemeScheduleEditor();
+                }
+
+                function themeDialPointerToMinutes(clientX, clientY) {
+                    const svg = document.getElementById('themeScheduleDial');
+                    if (!svg) return 0;
+                    const rect = svg.getBoundingClientRect();
+                    const x = clientX - rect.left;
+                    const y = clientY - rect.top;
+                    const cx = rect.width / 2;
+                    const cy = rect.height / 2;
+                    let angle = Math.atan2(y - cy, x - cx) * (180 / Math.PI);
+                    angle = (angle + 90 + 360) % 360;
+                    const minutes = Math.round((angle / 360) * 1440 / 5) * 5;
+                    return ((minutes % 1440) + 1440) % 1440;
+                }
+
+                function startThemeScheduleHandleDrag(event, index, handleType) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    selectedThemeScheduleIndex = index;
+                    themeScheduleDragState = { index, handleType };
+                    window.addEventListener('pointermove', onThemeScheduleHandleDrag);
+                    window.addEventListener('pointerup', stopThemeScheduleDrag);
+                    renderThemeScheduleDial();
+                    renderThemeScheduleEditor();
+                }
+
+                function onThemeScheduleHandleDrag(event) {
+                    if (!themeScheduleDragState) return;
+                    const item = themeScheduleData[themeScheduleDragState.index];
+                    if (!item) return;
+                    const newMinutes = themeDialPointerToMinutes(event.clientX, event.clientY);
+
+                    if (themeScheduleDragState.handleType === 'start') {
+                        item.timeFrom = themeMinutesToTime(newMinutes);
+                        if (item.timeFrom === item.timeTo) {
+                            item.timeFrom = themeMinutesToTime(newMinutes - 5);
+                        }
+                    } else {
+                        item.timeTo = themeMinutesToTime(newMinutes);
+                        if (item.timeFrom === item.timeTo) {
+                            item.timeTo = themeMinutesToTime(newMinutes + 5);
+                        }
+                    }
+
+                    renderThemeScheduleDial();
+                    renderThemeScheduleEditor();
+                }
+
+                function stopThemeScheduleDrag() {
+                    if (!themeScheduleDragState) return;
+                    themeScheduleDragState = null;
+                    window.removeEventListener('pointermove', onThemeScheduleHandleDrag);
+                    window.removeEventListener('pointerup', stopThemeScheduleDrag);
+                }
+
+                function saveThemeSchedule() {
+                    for (const schedule of themeScheduleData) {
+                        if (!schedule.timeFrom || !schedule.timeTo) {
+                            alert('時間帯を正しく設定してください。');
+                            return;
+                        }
+                    }
+
+                    saveThemeScheduleToStorage();
+                    closeThemeScheduleManager();
+
+                    if (getData('theme_schedule_enabled') === 'true') {
+                        startThemeScheduleCheck();
+                    }
+                }
+
+                function startThemeScheduleCheck() {
+                    if (themeScheduleCheckInterval) {
+                        clearInterval(themeScheduleCheckInterval);
+                    }
+                    applyThemeSchedule();
+                    themeScheduleCheckInterval = setInterval(applyThemeSchedule, 60000);
+                }
+
+                function stopThemeScheduleCheck() {
+                    if (themeScheduleCheckInterval) {
+                        clearInterval(themeScheduleCheckInterval);
+                        themeScheduleCheckInterval = null;
+                    }
+                }
+
+                function applyThemeSchedule() {
+                    if (getData('theme_schedule_enabled') !== 'true') return;
+
+                    loadThemeSchedule();
+                    if (themeScheduleData.length === 0) return;
+
+                    const now = new Date();
+                    const currentMinutes = now.getHours() * 60 + now.getMinutes();
+                    let matched = null;
+
+                    for (const schedule of themeScheduleData) {
+                        const fromMinutes = themeTimeToMinutes(schedule.timeFrom);
+                        const toMinutes = themeTimeToMinutes(schedule.timeTo);
+                        const inRange = fromMinutes <= toMinutes
+                            ? (currentMinutes >= fromMinutes && currentMinutes < toMinutes)
+                            : (currentMinutes >= fromMinutes || currentMinutes < toMinutes);
+
+                        if (inRange) {
+                            matched = normalizeThemeScheduleEntry(schedule);
+                            break;
+                        }
+                    }
+
+                    if (!matched) return;
+
+                    const body = document.body;
+                    const currentMode = body.classList.contains('light') ? 'light' : 'dark';
+                    if (currentMode !== matched.mode) {
+                        const themeIcon = document.getElementById('themeIcon');
+                        body.classList.remove('light', 'dark');
+                        body.classList.add(matched.mode);
+
+                        if (matched.mode === 'light') {
+                            themeIcon.src = 'moon.webp';
+                            themeIcon.alt = getText('toggleDarkMode');
+                        } else {
+                            themeIcon.src = 'sun.webp';
+                            themeIcon.alt = getText('toggleLightMode');
+                        }
+                        saveData('mode', matched.mode);
+                    }
+
+                    if (getData('graph_enabled') === 'true') {
+                        setTimeout(() => updateGraphs(), 100);
+                    }
+                    drawPiPCanvas();
+                }
+
                 function addMenuButton(feature) {
                     const menu = document.getElementById('mainMenu');
                     const btnText = feature === 'music' ? getText('menuMusic') : getText('menuTodo');
@@ -6234,15 +7512,77 @@
                     savePlaylist();
                     loadPlaylist();
                 }
+                function createPlaylistId() {
+                    return `pl_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+                }
+
+                function getActivePlaylistMeta() {
+                    return musicPlaylists.find(p => p.id === currentPlaylistId) || null;
+                }
+
+                function ensurePlaylistsState() {
+                    if (!Array.isArray(musicPlaylists) || musicPlaylists.length === 0) {
+                        musicPlaylists = [{ id: 'default', name: getText('playlist'), tracks: [] }];
+                    }
+                    if (!musicPlaylists.some(p => p.id === currentPlaylistId)) {
+                        currentPlaylistId = musicPlaylists[0].id;
+                    }
+                }
+
+                function persistPlaylists() {
+                    ensurePlaylistsState();
+                    saveData('music_playlists_v2', JSON.stringify({
+                        currentPlaylistId,
+                        playlists: musicPlaylists.map(p => ({
+                            id: p.id,
+                            name: p.name,
+                            tracks: Array.isArray(p.tracks) ? p.tracks.map(t => ({ id: t.id, title: t.title })) : []
+                        }))
+                    }));
+                }
+
+                function syncActivePlaylistTracksFromRuntime() {
+                    ensurePlaylistsState();
+                    const active = getActivePlaylistMeta();
+                    if (!active) return;
+                    active.tracks = musicFiles.map(m => ({ id: m.id, title: m.title }));
+                }
+
+                async function loadActivePlaylistFilesFromMeta() {
+                    ensurePlaylistsState();
+                    const active = getActivePlaylistMeta();
+                    musicFiles = [];
+                    if (!active || !Array.isArray(active.tracks)) return;
+                    for (const item of active.tracks) {
+                        if (!item || item.id == null) continue;
+                        try {
+                            const blob = await getFileBlobFromDB(item.id);
+                            if (!blob) continue;
+                            const url = URL.createObjectURL(blob);
+                            musicFiles.push({ url, title: item.title || 'Unknown track', id: item.id });
+                        } catch (e) {
+                            console.warn('Error loading track blob', item, e);
+                        }
+                    }
+                }
+
+                function updatePlaylistTitle() {
+                    const titleEl = document.getElementById('playlistTitle');
+                    if (!titleEl) return;
+                    const active = getActivePlaylistMeta();
+                    titleEl.textContent = (active && active.name) ? active.name : getText('playlist');
+                }
+
                 function savePlaylist() {
-                    const playlistData = musicFiles.map(m => ({ title: m.title, id: m.id }));
-                    saveData('musicPlaylist', JSON.stringify(playlistData));
+                    syncActivePlaylistTracksFromRuntime();
+                    persistPlaylists();
                 }
 
                 // 新しいプレイリスト描画(handle と data-index を付与)
                 function loadPlaylist() {
                     const playlistDiv = document.getElementById('playlist');
                     const playlistCount = document.getElementById('playlistCount');
+                    updatePlaylistTitle();
                     updatePlaylistSelectionUI();
                     if (musicFiles.length === 0) {
                         playlistDiv.innerHTML = `<div class="empty-state">${getText('emptyPlaylist')}</div>`;
@@ -6256,6 +7596,7 @@
                     playlistDiv.innerHTML = musicFiles.map((item, index) => `
         <div class="playlist-item ${index === currentMusicIndex ? 'playing' : ''} ${playlistSelectMode ? 'select-mode' : ''} ${selectedMusicItems.has(index) ? 'selected' : ''}" data-index="${index}">
             <div style="display:flex; align-items:center; gap:8px; flex:1; min-width:0;">
+                <img src="drag_handle.webp" class="drag-handle" data-index="${index}" aria-label="${getText('dragHandle')}" data-i18n-aria="dragHandle" alt="">
                 ${playlistSelectMode ? `<input type="checkbox" class="playlist-item-checkbox" data-index="${index}" ${selectedMusicItems.has(index) ? 'checked' : ''} onclick="event.stopPropagation(); togglePlaylistItemSelection(${index}, this.checked)">` : ''}
                 <div class="playlist-item-info" style="flex:1; min-width:0;">
                     <div class="playlist-item-title">
@@ -6368,13 +7709,86 @@
                             }
                             playMusic(idx);
                         });
+
+                        const handle = item.querySelector('.drag-handle');
+                        if (handle) {
+                            handle.addEventListener('click', (e) => {
+                                e.stopPropagation();
+                            });
+                            handle.addEventListener('touchstart', (e) => {
+                                if (playlistSelectMode) return;
+                                e.stopPropagation();
+                                const idx = parseInt(item.getAttribute('data-index'), 10);
+                                _touchDragState = {
+                                    srcIndex: idx,
+                                    targetIndex: idx,
+                                    insertTop: true
+                                };
+                                item.classList.add('dragging');
+                            }, { passive: true });
+
+                            handle.addEventListener('touchmove', (e) => {
+                                if (!_touchDragState || playlistSelectMode) return;
+                                const touch = e.touches && e.touches[0];
+                                if (!touch) return;
+                                const target = document.elementFromPoint(touch.clientX, touch.clientY);
+                                const targetItem = target ? target.closest('.playlist-item') : null;
+                                if (!targetItem) return;
+                                e.preventDefault();
+                                const targetIdx = parseInt(targetItem.getAttribute('data-index'), 10);
+                                const rect = targetItem.getBoundingClientRect();
+                                const isTopHalf = (touch.clientY - rect.top) < (rect.height / 2);
+
+                                playlist.querySelectorAll('.playlist-item').forEach(el => {
+                                    el.classList.remove('drag-over-top');
+                                    el.classList.remove('drag-over-bottom');
+                                });
+                                targetItem.classList.toggle('drag-over-top', isTopHalf);
+                                targetItem.classList.toggle('drag-over-bottom', !isTopHalf);
+
+                                _touchDragState.targetIndex = targetIdx;
+                                _touchDragState.insertTop = isTopHalf;
+                            }, { passive: false });
+
+                            handle.addEventListener('touchend', () => {
+                                if (!_touchDragState || playlistSelectMode) return;
+                                const src = _touchDragState.srcIndex;
+                                const targetIndex = _touchDragState.targetIndex;
+                                let insertIndex = _touchDragState.insertTop ? targetIndex : targetIndex + 1;
+                                if (src < insertIndex) insertIndex -= 1;
+
+                                playlist.querySelectorAll('.playlist-item').forEach(el => {
+                                    el.classList.remove('dragging');
+                                    el.classList.remove('drag-over-top');
+                                    el.classList.remove('drag-over-bottom');
+                                });
+
+                                if (!isNaN(src) && src >= 0 && src !== insertIndex) {
+                                    reorderMusicToIndex(src, insertIndex);
+                                }
+                                _touchDragState = null;
+                            }, { passive: true });
+                        }
                     });
                 }
 
                 function reorderMusicToIndex(srcIndex, insertIndex) {
                     if (srcIndex === insertIndex) return;
+                    const prevPlayingIndex = currentMusicIndex;
                     const item = musicFiles.splice(srcIndex, 1)[0];
                     musicFiles.splice(insertIndex, 0, item);
+
+                    if (prevPlayingIndex >= 0) {
+                        const mapIndex = (oldIndex, src, insert) => {
+                            if (oldIndex === src) return insert;
+                            let idx = oldIndex;
+                            if (src < oldIndex) idx -= 1;
+                            if (insert <= idx) idx += 1;
+                            return idx;
+                        };
+                        currentMusicIndex = mapIndex(prevPlayingIndex, srcIndex, insertIndex);
+                    }
+
                     savePlaylist();
                     loadPlaylist();
                 }
@@ -6424,6 +7838,7 @@
                                 audio.src = '';
                             }
                             currentMusicIndex = -1;
+                            saveData('music_current_track_id', '');
                         } else if (currentMusicIndex > idx) {
                             currentMusicIndex -= 1;
                         }
@@ -6435,6 +7850,278 @@
                     selectedMusicItems.clear();
                     savePlaylist();
                     loadPlaylist();
+                }
+
+                function renderPlaylistManager() {
+                    ensurePlaylistsState();
+                    const listEl = document.getElementById('playlistManagerList');
+                    if (!listEl) return;
+
+                    listEl.innerHTML = musicPlaylists.map((p, index) => {
+                        const trackCount = Array.isArray(p.tracks) ? p.tracks.length : 0;
+                        return `
+                            <div class="playlist-manager-item ${p.id === currentPlaylistId ? 'active' : ''}" data-pl-index="${index}" draggable="true">
+                                <div style="display:flex; align-items:center; gap:8px; min-width:0; flex:1;">
+                                    <img src="drag_handle.webp" class="drag-handle" alt="" data-i18n-aria="dragHandle" aria-label="${getText('dragHandle')}">
+                                    <button class="secondary" style="padding:6px 10px; white-space:nowrap;" data-action="switch" data-pl-id="${p.id}">${p.id === currentPlaylistId ? '●' : '○'}</button>
+                                    <div style="display:flex; flex-direction:column; min-width:0;">
+                                        <span style="font-weight:500; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHtml(p.name || getText('playlist'))}</span>
+                                        <span style="opacity:.65; font-size:.82rem;">${trackCount}</span>
+                                    </div>
+                                </div>
+                                <div class="playlist-manager-item-actions">
+                                    <button class="secondary" data-action="rename" data-pl-id="${p.id}">${getText('renameButton')}</button>
+                                    <button class="delete-btn" data-action="delete" data-pl-id="${p.id}">${getText('deleteButton')}</button>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+
+                    attachPlaylistManagerHandlers();
+                }
+
+                function attachPlaylistManagerHandlers() {
+                    const listEl = document.getElementById('playlistManagerList');
+                    if (!listEl) return;
+                    let srcIndex = null;
+
+                    listEl.onclick = async (e) => {
+                        const btn = e.target.closest('button[data-action]');
+                        if (!btn) return;
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const action = btn.getAttribute('data-action');
+                        const plId = btn.getAttribute('data-pl-id');
+                        if (action === 'switch') {
+                            await switchPlaylist(plId);
+                        } else if (action === 'rename') {
+                            renamePlaylistMeta(plId);
+                        } else if (action === 'delete') {
+                            await deletePlaylistMeta(plId);
+                        }
+                    };
+
+                    listEl.querySelectorAll('.playlist-manager-item').forEach(item => {
+                        item.addEventListener('dragstart', (e) => {
+                            if (e.target && e.target.closest && e.target.closest('button')) {
+                                e.preventDefault();
+                                return;
+                            }
+                            srcIndex = parseInt(item.getAttribute('data-pl-index'), 10);
+                            item.classList.add('dragging');
+                            e.dataTransfer.effectAllowed = 'move';
+                            e.dataTransfer.setData('text/plain', String(srcIndex));
+                        });
+
+                        item.addEventListener('dragover', (e) => {
+                            e.preventDefault();
+                            const rect = item.getBoundingClientRect();
+                            const isTopHalf = (e.clientY - rect.top) < (rect.height / 2);
+                            item.classList.toggle('drag-over-top', isTopHalf);
+                            item.classList.toggle('drag-over-bottom', !isTopHalf);
+                        });
+
+                        item.addEventListener('dragleave', () => {
+                            item.classList.remove('drag-over-top');
+                            item.classList.remove('drag-over-bottom');
+                        });
+
+                        item.addEventListener('drop', (e) => {
+                            e.preventDefault();
+                            const targetIndex = parseInt(item.getAttribute('data-pl-index'), 10);
+                            const rect = item.getBoundingClientRect();
+                            const isTopHalf = (e.clientY - rect.top) < (rect.height / 2);
+                            let insertIndex = isTopHalf ? targetIndex : targetIndex + 1;
+                            if (srcIndex < insertIndex) insertIndex -= 1;
+                            if (srcIndex != null && srcIndex !== insertIndex) {
+                                const moved = musicPlaylists.splice(srcIndex, 1)[0];
+                                musicPlaylists.splice(insertIndex, 0, moved);
+                                persistPlaylists();
+                                renderPlaylistManager();
+                            }
+                        });
+
+                        item.addEventListener('dragend', () => {
+                            item.classList.remove('dragging');
+                            item.classList.remove('drag-over-top');
+                            item.classList.remove('drag-over-bottom');
+                            srcIndex = null;
+                        });
+                    });
+                }
+
+                function openPlaylistManager() {
+                    const overlay = document.getElementById('playlistManagerOverlay');
+                    if (!overlay) return;
+                    renderPlaylistManager();
+                    overlay.classList.add('show');
+                    const input = document.getElementById('newPlaylistNameInput');
+                    if (input) {
+                        setTimeout(() => input.focus(), 0);
+                    }
+                }
+
+                function closePlaylistManager() {
+                    const overlay = document.getElementById('playlistManagerOverlay');
+                    if (!overlay) return;
+                    overlay.classList.remove('show');
+                }
+
+                async function addNewPlaylist() {
+                    const input = document.getElementById('newPlaylistNameInput');
+                    if (!input) return;
+                    const rawName = (input.value || '').trim();
+                    const name = rawName || `${getText('playlist')} ${musicPlaylists.length + 1}`;
+
+                    ensurePlaylistsState();
+                    const id = createPlaylistId();
+                    musicPlaylists.push({ id, name, tracks: [] });
+                    syncActivePlaylistTracksFromRuntime();
+                    currentPlaylistId = id;
+                    musicFiles = [];
+                    currentMusicIndex = -1;
+                    const audio = document.getElementById('audioPlayer');
+                    if (audio) {
+                        audio.pause();
+                        audio.src = '';
+                    }
+                    input.value = '';
+                    persistPlaylists();
+                    loadPlaylist();
+                    renderPlaylistManager();
+                }
+
+                async function switchPlaylist(playlistId) {
+                    if (!playlistId || playlistId === currentPlaylistId) return;
+                    syncActivePlaylistTracksFromRuntime();
+                    currentPlaylistId = playlistId;
+
+                    const audio = document.getElementById('audioPlayer');
+                    if (audio) {
+                        audio.pause();
+                        audio.src = '';
+                    }
+                    currentMusicIndex = -1;
+
+                    await loadActivePlaylistFilesFromMeta();
+                    persistPlaylists();
+                    loadPlaylist();
+                    renderPlaylistManager();
+                }
+
+                function renamePlaylistMeta(playlistId) {
+                    const target = musicPlaylists.find(p => p.id === playlistId);
+                    if (!target) return;
+                    closePlaylistManager();
+                    _renamingPlaylistId = playlistId;
+                    const overlay = document.getElementById('playlistRenameOverlay');
+                    const input = document.getElementById('playlistRenameInput');
+                    if (!overlay || !input) return;
+                    input.value = target.name || getText('playlist');
+                    overlay.classList.add('show');
+                    overlay.setAttribute('aria-hidden', 'false');
+                    setTimeout(() => {
+                        input.focus();
+                        input.select();
+                    }, 0);
+                }
+
+                function commitPlaylistRename() {
+                    if (!_renamingPlaylistId) return;
+                    const input = document.getElementById('playlistRenameInput');
+                    if (!input) return;
+                    const nextName = (input.value || '').trim();
+                    if (!nextName) return;
+                    const target = musicPlaylists.find(p => p.id === _renamingPlaylistId);
+                    if (!target) return;
+                    target.name = nextName;
+                    persistPlaylists();
+                    cancelPlaylistRename();
+                    loadPlaylist();
+                    renderPlaylistManager();
+                    openPlaylistManager();
+                }
+
+                function cancelPlaylistRename() {
+                    const overlay = document.getElementById('playlistRenameOverlay');
+                    if (overlay) {
+                        overlay.classList.remove('show');
+                        overlay.setAttribute('aria-hidden', 'true');
+                    }
+                    _renamingPlaylistId = null;
+                    openPlaylistManager();
+                }
+
+                async function deletePlaylistMeta(playlistId) {
+                    if (!playlistId) return;
+                    if (musicPlaylists.length <= 1) return;
+                    closePlaylistManager();
+                    const ok = await customConfirm(getText('confirmDelete'), getText('deleteConfirmTitle'), 'delete.webp');
+                    if (!ok) {
+                        openPlaylistManager();
+                        return;
+                    }
+
+                    const idx = musicPlaylists.findIndex(p => p.id === playlistId);
+                    if (idx < 0) return;
+                    musicPlaylists.splice(idx, 1);
+
+                    if (currentPlaylistId === playlistId) {
+                        currentPlaylistId = musicPlaylists[0].id;
+                        const audio = document.getElementById('audioPlayer');
+                        if (audio) {
+                            audio.pause();
+                            audio.src = '';
+                        }
+                        currentMusicIndex = -1;
+                        await loadActivePlaylistFilesFromMeta();
+                    }
+
+                    persistPlaylists();
+                    loadPlaylist();
+                    renderPlaylistManager();
+                    openPlaylistManager();
+                }
+
+                async function restorePlaylistsFromStorage() {
+                    let loadedV2 = false;
+                    try {
+                        const rawV2 = getData('music_playlists_v2');
+                        if (rawV2) {
+                            const parsed = JSON.parse(rawV2);
+                            if (parsed && Array.isArray(parsed.playlists) && parsed.playlists.length > 0) {
+                                musicPlaylists = parsed.playlists.map(p => ({
+                                    id: p.id || createPlaylistId(),
+                                    name: p.name || getText('playlist'),
+                                    tracks: Array.isArray(p.tracks) ? p.tracks.filter(t => t && t.id != null) : []
+                                }));
+                                currentPlaylistId = parsed.currentPlaylistId || musicPlaylists[0].id;
+                                loadedV2 = true;
+                            }
+                        }
+                    } catch (e) {
+                        console.warn('Failed to parse music_playlists_v2', e);
+                    }
+
+                    if (!loadedV2) {
+                        try {
+                            const legacy = getData('musicPlaylist');
+                            const tracks = legacy ? JSON.parse(legacy) : [];
+                            musicPlaylists = [{
+                                id: 'default',
+                                name: getText('playlist'),
+                                tracks: Array.isArray(tracks) ? tracks.filter(t => t && t.id != null) : []
+                            }];
+                            currentPlaylistId = 'default';
+                        } catch (e) {
+                            musicPlaylists = [{ id: 'default', name: getText('playlist'), tracks: [] }];
+                            currentPlaylistId = 'default';
+                        }
+                    }
+
+                    ensurePlaylistsState();
+                    await loadActivePlaylistFilesFromMeta();
+                    persistPlaylists();
                 }
 
                 // 独自の曲名編集(ポップアップ方式)
@@ -6483,6 +8170,38 @@
                 document.getElementById('renameOverlay')?.addEventListener('click', (e) => {
                     if (e.target === e.currentTarget) cancelRename();
                 });
+                document.getElementById('playlistManagerOverlay')?.addEventListener('click', (e) => {
+                    if (e.target === e.currentTarget) closePlaylistManager();
+                });
+                document.getElementById('newPlaylistNameInput')?.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        addNewPlaylist();
+                    } else if (e.key === 'Escape') {
+                        e.preventDefault();
+                        closePlaylistManager();
+                    }
+                });
+                document.getElementById('playlistRenameOkBtn')?.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    commitPlaylistRename();
+                });
+                document.getElementById('playlistRenameCancelBtn')?.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    cancelPlaylistRename();
+                });
+                document.getElementById('playlistRenameOverlay')?.addEventListener('click', (e) => {
+                    if (e.target === e.currentTarget) cancelPlaylistRename();
+                });
+                document.getElementById('playlistRenameInput')?.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        commitPlaylistRename();
+                    } else if (e.key === 'Escape') {
+                        e.preventDefault();
+                        cancelPlaylistRename();
+                    }
+                });
 
                 // renameInputでEnterキー対応
                 document.getElementById('renameInput')?.addEventListener('keydown', (e) => {
@@ -6516,6 +8235,10 @@
                         });
 
                         currentMusicIndex = index;
+                        saveData('music_current_playlist_id', currentPlaylistId);
+                        if (musicFiles[index] && musicFiles[index].id != null) {
+                            saveData('music_current_track_id', String(musicFiles[index].id));
+                        }
                         const playImg = document.getElementById('playIconImg');
                         if (playImg) { playImg.src = 'pause.webp'; playImg.alt = getText('pause'); }
                         loadPlaylist();
@@ -6650,7 +8373,11 @@
                     isLoop = !isLoop;
                     const audio = document.getElementById('audioPlayer');
                     audio.loop = isLoop;
+                    saveData('music_loop', isLoop ? 'true' : 'false');
                     document.getElementById('loopBtn').style.opacity = isLoop ? '1' : '0.5';
+                    isLoop = getData('music_loop') === 'true';
+                    isShuffle = getData('music_shuffle') === 'true';
+
                     const loopImg = document.getElementById('loopBtnImg');
                     if (loopImg) {
                         loopImg.src = isLoop ? 'loop_on.webp' : 'loop_off.webp';
@@ -6660,6 +8387,7 @@
 
                 function toggleShuffle() {
                     isShuffle = !isShuffle;
+                    saveData('music_shuffle', isShuffle ? 'true' : 'false');
                     document.getElementById('shuffleBtn').style.opacity = isShuffle ? '1' : '0.5';
                     const shImg = document.getElementById('shuffleBtnImg');
                     if (shImg) {
@@ -6683,6 +8411,7 @@
                                 audio.src = '';
                             }
                             currentMusicIndex = -1;
+                            saveData('music_current_track_id', '');
                         } else if (currentMusicIndex > index) {
                             currentMusicIndex--;
                         }
@@ -6777,6 +8506,7 @@
                 if (volumeSlider) {
                     volumeSlider.addEventListener('input', (e) => {
                         audioEl.volume = parseFloat(e.target.value);
+                        saveData('music_volume', String(audioEl.volume));
                         if (audioEl.volume === 0) volumeBtnImg.src = 'volume_mute.webp';
                         else if (audioEl.volume < 0.5) volumeBtnImg.src = 'volume_low.webp';
                         else volumeBtnImg.src = 'volume.webp';
@@ -8701,6 +10431,21 @@
                     const musicEnabled = getData('feature_music') === 'true';
                     const todoEnabled = getData('feature_todo') === 'true';
 
+                    // Initialize Theme Schedule Settings
+                    const themeScheduleEnabled = getData('theme_schedule_enabled') === 'true';
+                    const themeScheduleToggle = document.getElementById('toggleThemeSchedule');
+                    const themeScheduleEditBtn = document.getElementById('themeScheduleEditBtn');
+                    
+                    if (themeScheduleEnabled) {
+                        if (themeScheduleToggle) themeScheduleToggle.classList.add('active');
+                        if (themeScheduleEditBtn) themeScheduleEditBtn.style.display = 'inline-flex';
+                        loadThemeSchedule();
+                        startThemeScheduleCheck();
+                    } else {
+                        if (themeScheduleToggle) themeScheduleToggle.classList.remove('active');
+                        if (themeScheduleEditBtn) themeScheduleEditBtn.style.display = 'none';
+                    }
+
                     // Initialize Focus Mode Settings
                     const focusInfoEnabled = getData('feature_focus_mode_display') !== 'false'; // Default to true
                     if (focusInfoEnabled) {
@@ -8905,32 +10650,39 @@
                     const volumeSlider = document.getElementById('volumeSlider');
                     const volumeBtnImg = document.getElementById('volumeBtnImg');
                     if (audioEl) {
-                        audioEl.volume = 1;
+                        const savedVolume = Math.max(0, Math.min(1, parseFloat(getData('music_volume') || '1') || 1));
+                        audioEl.volume = savedVolume;
+                        audioEl.loop = isLoop;
                         if (volumeSlider) {
                             volumeSlider.value = audioEl.volume;
                             volumeSlider.style.display = 'none';
                         }
-                        if (volumeBtnImg) volumeBtnImg.src = 'volume.webp';
+                        if (volumeBtnImg) {
+                            if (audioEl.volume === 0) volumeBtnImg.src = 'volume_mute.webp';
+                            else if (audioEl.volume < 0.5) volumeBtnImg.src = 'volume_low.webp';
+                            else volumeBtnImg.src = 'volume.webp';
+                        }
                     }
                     await (async () => {
                         try {
-                            const playlistCookie = getData('musicPlaylist');
-                            if (playlistCookie) {
-                                const list = JSON.parse(playlistCookie);
-                                for (const item of list) {
-                                    try {
-                                        const blob = await getFileBlobFromDB(item.id);
-                                        if (blob) {
-                                            const url = URL.createObjectURL(blob);
-                                            musicFiles.push({ url: url, title: item.title, id: item.id });
-                                        }
-                                    } catch (e) {
-                                        console.warn('Error loading blob for', item, e);
-                                    }
-                                }
-                                if (musicFiles.length > 0) loadPlaylist();
-                                setupMusicResumeOnNextGesture();
+                            await restorePlaylistsFromStorage();
+                            const savedPlaylistId = getData('music_current_playlist_id');
+                            if (savedPlaylistId && musicPlaylists.some(p => p.id === savedPlaylistId) && savedPlaylistId !== currentPlaylistId) {
+                                currentPlaylistId = savedPlaylistId;
+                                await loadActivePlaylistFilesFromMeta();
                             }
+
+                            const savedTrackId = getData('music_current_track_id');
+                            if (savedTrackId) {
+                                currentMusicIndex = musicFiles.findIndex(m => String(m.id) === String(savedTrackId));
+                            }
+                            if (currentMusicIndex < 0 || currentMusicIndex >= musicFiles.length) {
+                                currentMusicIndex = -1;
+                            }
+
+                            loadPlaylist();
+                            renderPlaylistManager();
+                            setupMusicResumeOnNextGesture();
                         } catch (e) {
                             console.error('Failed to restore playlist from DB', e);
                         }
