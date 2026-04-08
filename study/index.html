@@ -2,6 +2,7 @@
 <html lang="ja">
 
 <head>
+    <link rel="canonical" href="https://tsumiki.app">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title data-i18n="title">ツミキ | 勉強時間管理ツール - 自分好みにカスタマイズできる勉強時間管理ツール</title>
@@ -4222,6 +4223,165 @@
                 font-size: 1.1rem;
             }
         }
+
+        /* Migration Notice - Simple Design */
+        .migration-notice-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000001;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            backdrop-filter: blur(2px);
+        }
+
+        .migration-notice-overlay.show {
+            display: flex;
+        }
+
+        .migration-notice-dialog {
+            width: 100%;
+            max-width: 500px;
+            border-radius: 24px;
+            padding: 32px;
+            text-align: center;
+            animation: slideUp 0.3s ease-out;
+            position: relative;
+        }
+
+        .light .migration-notice-dialog {
+            background: var(--bg-light);
+            color: #323232;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .dark .migration-notice-dialog {
+            background: var(--panel-dark);
+            color: #e8e8e8;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .migration-notice-title {
+            font-size: 1.5rem;
+            font-weight: 500;
+            margin-bottom: 16px;
+            letter-spacing: -0.02em;
+        }
+
+        .migration-notice-message {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            opacity: 0.8;
+            margin-bottom: 28px;
+        }
+
+        .migration-notice-url {
+            display: inline-block;
+            margin: 12px 0;
+            padding: 8px 14px;
+            border-radius: 24px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            word-break: break-all;
+        }
+
+        .light .migration-notice-url {
+            background: rgba(0, 0, 0, 0.05);
+            color: #0066cc;
+        }
+
+        .dark .migration-notice-url {
+            background: rgba(255, 255, 255, 0.08);
+            color: #66b3ff;
+        }
+
+        .migration-notice-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .migration-notice-actions-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .migration-notice-actions button {
+            padding: 12px 20px;
+            border-radius: 24px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .migration-notice-actions button.primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .dark .migration-notice-actions button.primary {
+            background: var(--primary-color-dark);
+        }
+
+        .migration-notice-actions button.primary:hover {
+            opacity: 0.9;
+        }
+
+        .migration-notice-actions button.secondary {
+            background: transparent;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .dark .migration-notice-actions button.secondary {
+            border-color: var(--primary-color-dark);
+            color: var(--primary-color-dark);
+        }
+
+        .migration-notice-actions button.secondary:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        .dark .migration-notice-actions button.secondary:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .migration-notice-checkbox {
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            opacity: 0.7;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .migration-notice-checkbox input {
+            cursor: pointer;
+        }
+
+        @media (max-width: 480px) {
+            .migration-notice-dialog {
+                padding: 24px 16px;
+            }
+
+            .migration-notice-title {
+                font-size: 1.2rem;
+            }
+
+            .migration-notice-actions-row {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 
 </head>
@@ -4243,6 +4403,28 @@
             }
         } catch(e) {}
     </script>
+
+    <div class="migration-notice-overlay" id="migrationNoticeOverlay" aria-hidden="true">
+        <div class="migration-notice-dialog" role="dialog" aria-modal="true" aria-labelledby="migrationNoticeTitle">
+            <h2 class="migration-notice-title" id="migrationNoticeTitle">ドメインが変更されました</h2>
+            <div class="migration-notice-message">
+                ツミキの新しいドメインが <strong>tsumiki.app</strong> になりました。データを引き継ぐには、下のボタンからエクスポートしてください。
+                <div class="migration-notice-url">https://tsumiki.app/</div>
+            </div>
+            <div class="migration-notice-actions">
+                <button class="primary" id="migrationGoBtn">新サイト (tsumiki.app) へ移動</button>
+                <div class="migration-notice-actions-row">
+                    <button class="secondary" id="migrationExportBtn">データをエクスポート</button>
+                    <button class="secondary" id="migrationContinueBtn">このURLで続ける</button>
+                </div>
+            </div>
+            <label class="migration-notice-checkbox" for="migrationDontShowAgain">
+                <input type="checkbox" id="migrationDontShowAgain">
+                <span>次回から表示しない</span>
+            </label>
+        </div>
+    </div>
+
     <div id="loadingOverlay"></div>
     <canvas id="pipCanvas" width="960" height="540" style="display:none;"></canvas>
     <video id="pipVideo" style="display:none;" muted playsinline></video>
@@ -6057,6 +6239,55 @@
                         updatePlaylistTitle();
                     }
                 }
+
+                // Migration Notice
+                const MIGRATION_NOTICE_KEY = 'migration_notice_hidden_tsumiki';
+                const MIGRATION_TARGET_URL = 'https://tsumiki.app/';
+
+                function isLegacyStudyUrl() {
+                    const host = (window.location.hostname || '').toLowerCase();
+                    return host !== 'tsumiki.app' && host !== 'localhost';
+                }
+
+                function shouldShowMigrationNotice() {
+                    return isLegacyStudyUrl() && getData(MIGRATION_NOTICE_KEY) !== 'true';
+                }
+
+                function persistMigrationNoticePreference() {
+                    const hideCheckbox = document.getElementById('migrationDontShowAgain');
+                    const shouldHide = !!(hideCheckbox && hideCheckbox.checked);
+                    saveData(MIGRATION_NOTICE_KEY, shouldHide ? 'true' : 'false');
+                }
+
+                function showMigrationNotice() {
+                    const overlay = document.getElementById('migrationNoticeOverlay');
+                    if (!overlay) return;
+                    overlay.classList.add('show');
+                    overlay.setAttribute('aria-hidden', 'false');
+                    document.body.classList.add('no-scroll');
+                }
+
+                function hideMigrationNotice() {
+                    const overlay = document.getElementById('migrationNoticeOverlay');
+                    if (!overlay) return;
+                    overlay.classList.remove('show');
+                    overlay.setAttribute('aria-hidden', 'true');
+                    document.body.classList.remove('no-scroll');
+                }
+
+                document.getElementById('migrationExportBtn')?.addEventListener('click', () => {
+                    exportData();
+                });
+
+                document.getElementById('migrationContinueBtn')?.addEventListener('click', () => {
+                    persistMigrationNoticePreference();
+                    hideMigrationNotice();
+                });
+
+                document.getElementById('migrationGoBtn')?.addEventListener('click', () => {
+                    persistMigrationNoticePreference();
+                    window.location.href = MIGRATION_TARGET_URL;
+                });
 
                 // カスタム確認ダイアログ
                 let confirmResolve = null;
@@ -11227,6 +11458,11 @@
                 setTimeout(() => {
                     initTodoV2();
                 }, 1000); // ローディングアニメーション後に表示
+
+                // Migration Notice を表示
+                if (shouldShowMigrationNotice()) {
+                    showMigrationNotice();
+                }
 
                 // Trigger loading overlay wipe animation
                 // Trigger loading overlay wipe animation (Moved to window.onload)
